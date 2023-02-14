@@ -1,4 +1,4 @@
-import { openDB, deleteDB } from './modules/idb';
+import { openDB, deleteDB } from './modules/idb/index.js';
 
 export const db = await initDb();
 
