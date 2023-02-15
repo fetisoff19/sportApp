@@ -157,17 +157,14 @@ function addEditTrainingToTable(workout) {
 function makeTd(obj) {
   let tr = document.createElement('tr');
   tr.dataset.id = obj.id;
-
   document.querySelector('#editTable').append(tr);
   for (let key in obj) {
-
     let td = document.createElement('td');
     if ((typeof obj[key]) == 'object') {
       if(obj[key].length > 0) continue
         td.innerHTML = key + ': ' + obj[key].toLocaleString("en-GB");
    }
    else td.innerHTML = key + ': ' + obj[key];
-
    tr.append(td)
   }
 }
