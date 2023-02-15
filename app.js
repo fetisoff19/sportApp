@@ -155,19 +155,28 @@ function addEditTrainingToTable(workout) {
 }
 
 function makeTd(obj) {
-  let tr = document.createElement('tr');
-  tr.dataset.id = obj.id;
-
-  document.querySelector('#editTable').append(tr);
+  let tr1 = document.createElement('tr');
+  let tr2 = document.createElement('tr');
+  tr1.dataset.id = tr2.dataset.id = obj.id;
+  document.querySelector('#editTable').append(tr1);
+  document.querySelector('#editTable').append(tr2);
+  //добавляем ключи в верхнюю строку таблицы в виде строк
   for (let key in obj) {
-
     let td = document.createElement('td');
+    if(obj[key].length > 0) continue
+    td.innerHTML = key
+    tr1.append(td)
+  }
+  //добавляем ключи в верхнюю строку таблицы в виде значений инпутов
+  for (let key in obj) {
+    let input = document.createElement('input');
+    input.setAttribute('type', 'text');
+    input.setAttribute('size', '10');
     if ((typeof obj[key]) == 'object') {
       if(obj[key].length > 0) continue
-        td.innerHTML = key + ': ' + obj[key].toLocaleString("en-GB");
-   }
-   else td.innerHTML = key + ': ' + obj[key];
-
-   tr.append(td)
+      input.value = obj[key].toLocaleString("en-GB");
+    }
+    else input.value = obj[key];
+    tr2.append(input)
   }
 }
