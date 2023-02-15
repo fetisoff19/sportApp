@@ -48,21 +48,8 @@ export async function deleteWorkout(id) {
   await workoutsDataOS.delete(id);
 }
 
-export async function changeWorkout(id, type, value) {
-  const tx = db.transaction(['workouts', 'workoutsData'], 'readwrite');
-  const workoutsOS = tx.objectStore('workouts');
-  // const workoutsDataOS = tx.objectStore('workoutsData');
-  let workout = await workoutsOS.get(id)
-  if (type in workout) {
-    workout[type] = value;
-    await workoutsOS.put(workout);
-  }
-  //
-  // if (type in  workoutsDataOS) {
-  //   workoutsDataOS[type] = value;
-  //   await workoutsDataOS.put(id);
-  //   console.log('workoutsData.put(id)')
-  // }
-
+export function setIndexedDbUsageInfo() {
+  navigator.storage.estimate().then(result=>{
+    document.querySelector('#indexedDbUsage').innerHTML = 'indexedDb: '+(result.usageDetails.indexedDB/(10**6)).toFixed(2)+'MB';
+  });
 }
-
