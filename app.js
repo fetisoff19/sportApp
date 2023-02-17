@@ -1,6 +1,7 @@
 import { parseFit } from './utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo} from './db.js';
 
+let keyInSessionMesgs = new Set();
 
 fillWorkoutsTable();
 setIndexedDbUsageInfo();
@@ -46,20 +47,15 @@ function addRowToWorkoutsTable(rec) {
   tdId.innerHTML = rec.id;
   tdName.innerHTML = rec.name;
   tdType.innerHTML = rec.type;
-  tdTimeCreated.innerHTML = rec.timeCreated;
-  tdDateAdded.innerHTML = rec.dateAdded;
+  tdTimeCreated.innerHTML = rec.timeCreated.toLocaleString("en-GB");
+  tdDateAdded.innerHTML = rec.dateAdded.toLocaleString("en-GB");
 
-  //кнопка изменения тренировки
-  let tdEdit = document.createElement('td');
-  let editBtn = document.createElement('input');
-  editBtn.type = 'button';
-  editBtn.value = 'edit';
-  editBtn.addEventListener('click', (e) => {
-        let id = parseInt(e.target.parentElement.parentElement.dataset.id)
-        editTraining(id)
-      }
-  );
-  tdEdit.appendChild(editBtn);
+  //кнопка просмотра тренировки
+  let viewStatus = true;
+  let tdView = document.createElement('td');
+  let viewBtn = document.createElement('input');
+  viewBtn.type = 'button';
+  viewBtn.value = 'view';
 
   document.querySelector('#workoutsTable').append(tr);
   tr.append(tdId);
@@ -67,12 +63,36 @@ function addRowToWorkoutsTable(rec) {
   tr.append(tdType);
   tr.append(tdTimeCreated);
   tr.append(tdDateAdded);
-  tr.append(tdEdit);
+  tr.append(tdView);
   tr.append(tdLog);
   tr.append(tdDel);
+  tdView.append(viewBtn);
+
+    viewBtn.addEventListener('click', (e) => {
+      let id = parseInt(e.target.parentElement.parentElement.dataset.id)
+      let section = document.createElement('section')
+      let btnEdit = document.createElement('input');
+      section.setAttribute('class', 'viewTable')
+      section.setAttribute('id',`${rec.id}`)
+      section.innerHTML = 'Тренировка: ' + `${rec.id}`;
+      btnEdit.type = 'button';
+      btnEdit.value = 'edit';
+
+    if (viewStatus) {
+      viewStatus = false;
+      viewBtn.value = 'close';
+      viewBtn.parentElement.parentElement.after(section)
+      section.append(btnEdit)
+      viewTraining(id);
+      btnEdit.onclick = function (){}
+
+    } else {
+      viewStatus = true;
+      viewBtn.value = 'view';
+      document.getElementById(`${rec.id}`).remove()
+    }
+  });
 }
-
-
 
 async function saveJsonFileFromFit(file) {
   const workoutDataObj = await parseFit(file);
@@ -99,7 +119,6 @@ function copyKeyInObj(origObj, newObj) {
         newObj[key] = origObj[key]}
     }
 }
-
 
 //создание тренировки(-ок) из файла
 document.querySelector('#create-workout-fit-inp').addEventListener('change', async (event) => {
@@ -134,22 +153,34 @@ document.querySelector('#create-workout-fit-inp').addEventListener('change', asy
 document.querySelector('#fit-to-json-file-inp')
     .addEventListener('change',
         (e)=>saveJsonFileFromFit(e.target.files[0])
-    );
+);
 
-
-async function editTraining (id) {
+async function viewTraining (id) {
   const tx = db.transaction(['workouts', 'workoutsData'], 'readwrite');
   const workoutsOS = tx.objectStore('workouts');
   let workout = await workoutsOS.get(id)
-  addEditTrainingToTable(workout)
+  addViewTraining(workout)
 }
 
-function addEditTrainingToTable(workout) {
+function addViewTraining (workout) {
   let object={};
+  let filterArrKey = [];
+  let filterArrValue = [];
   if ('sessionMesgs' in workout)
      for (let key in workout.sessionMesgs[0]) {
-       object[key] = workout.sessionMesgs[0][key];
-    }
+        if (key in keyInSessionMsgRun) {
+          filterArrKey.push(keyInSessionMsgRun[key]);
+          filterArrValue.push(workout.sessionMesgs[0][key])
+       }
+     }
+  for (let i = 0; i < filterArrKey.length; i++) {
+    if (!isNaN(parseFloat(filterArrValue[i]))
+        && isFinite(filterArrValue[i])
+        && String(filterArrValue[i]).length > 12) {
+      object[filterArrKey[i]] = filterArrValue[i].toFixed(0);
+    } else
+    object[filterArrKey[i]] = filterArrValue[i];
+  }
   object.id = workout.id
   makeTd(object)
 }
@@ -158,25 +189,74 @@ function makeTd(obj) {
   let tr1 = document.createElement('tr');
   let tr2 = document.createElement('tr');
   tr1.dataset.id = tr2.dataset.id = obj.id;
-  document.querySelector('#editTable').append(tr1);
-  document.querySelector('#editTable').append(tr2);
-  //добавляем ключи в верхнюю строку таблицы в виде строк
+  document.getElementById(`${obj.id}`).append(tr1, tr2);
+  //добавляем ключи в верхнюю строку таблицы
   for (let key in obj) {
     let td = document.createElement('td');
-    if(obj[key].length > 0) continue
-    td.innerHTML = key
+    if ((typeof obj[key]) == 'object'
+        && obj[key].length > 0) continue
+     td.innerHTML = key
     tr1.append(td)
   }
-  //добавляем ключи в верхнюю строку таблицы в виде значений инпутов
+  //добавляем значения ключей в нижнюю строку таблицы
   for (let key in obj) {
-    let input = document.createElement('input');
-    input.setAttribute('type', 'text');
-    input.setAttribute('size', '10');
+    let td = document.createElement('td');
     if ((typeof obj[key]) == 'object') {
       if(obj[key].length > 0) continue
-      input.value = obj[key].toLocaleString("en-GB");
+      td.innerHTML = obj[key].toLocaleString("en-GB");
     }
-    else input.value = obj[key];
-    tr2.append(input)
+    else
+      td.innerHTML = obj[key];
+    tr2.append(td)
   }
+}
+
+
+//
+// //добавляем ключи в верхнюю строку таблицы в виде значений инпутов
+// for (let key in obj) {
+//   let input = document.createElement('input');
+//   input.setAttribute('type', 'text');
+//   input.setAttribute('size', '10');
+//   if ((typeof obj[key]) == 'object') {
+//     if(obj[key].length > 0) continue
+//     input.value = obj[key].toLocaleString("en-GB");
+//   }
+//   else input.value = obj[key];
+//   tr2.append(input)
+// }
+
+// function getKeyInSessionMesgs (file) {
+//   if ('sessionMesgs' in file)
+//     for (let key in file.sessionMesgs[0]) {
+//       keyInSessionMesgs.push(key)
+//     }
+//
+//  }
+
+
+let keyInSessionMsgRun = {
+timestamp: "Начало занятия",
+startTime: "Окончание занятия",
+totalElapsedTime: "Общее время тренировки",
+totalTimerTime: "Время в движении",
+totalDistance: "Расстояние",
+totalStrides: "Шаги",
+totalCalories: "Калорий",
+avgSpeed: "Средняя скорость",
+maxSpeed: "Макс. скорость",
+minAltitude: "Мин. высота",
+avgAltitude: "Средняя высота",
+maxAltitude: "Макс. высота",
+avgGrade: "Средний градиент",
+maxPosGrade: "Макс. градиент",
+totalAscent: "Набор",
+totalDescent: "Спуск",
+sport: "Вид занятия",
+avgHeartRate: "Средний пульс",
+minHeartRate: "Минимальный пульс",
+maxHeartRate: "Макс. пульс",
+avgCadence: "Средний каденс",
+maxCadence: "Макс. каденс",
+avgRunningCadence: "Средний каденс",
 }

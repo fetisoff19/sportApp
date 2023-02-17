@@ -2,6 +2,10 @@ h1 {
 	color: #ff6200;
 }
 
-#editTable > tr {
-	display: flex;
+table {
+	display: inline-block;
+}
+
+td {
+	padding: 2px;
 }
