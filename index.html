@@ -10,25 +10,34 @@
   <script type="module" src="app.js"></script>
   </head>
   <body>
-  <span id="indexedDbUsage"></span>
-  </br>
-  <label for="fit-to-json-file-inp">FIT TO JSON</label>
-  <input type="file" id="fit-to-json-file-inp" accept=".fit">
-  </br>
-  <label for="create-workout-fit-inp">CREATE WORKOUT FROM FIT</label>
-  <input type="file" id="create-workout-fit-inp" accept=".fit" multiple>
-  </br>
-  <h1>WORKOUTS</h1>
-  <table id="workoutsTable">
-    <tr>
-        <td class="id">Id</td>
-        <td class="name">Name</td>
-        <td class="type">Type</td>
-        <td class="timeCreated">Created</td>
-        <td class="dateAdded">Date added</td>
-        <td class="log"></td>
-        <td class="del"></td>
-    </tr>
-  </table>
+    <header class="app-header">
+      <span class="app-logo">sportsApp</span>
+    </header>
+    <main>
+
+      <label for="fit-to-json-file-inp">FIT TO JSON</label>
+      <input type="file" id="fit-to-json-file-inp" accept=".fit">
+      </br>
+      <label for="create-workout-fit-inp">CREATE WORKOUT FROM FIT</label>
+      <input type="file" id="create-workout-fit-inp" accept=".fit" multiple>
+      </br>
+      <h1>WORKOUTS</h1>
+      <table id="workoutsTable">
+        <tr>
+            <td class="id">Id</td>
+            <td class="name">Name</td>
+            <td class="type">Type</td>
+            <td class="timeCreated">Created</td>
+            <td class="dateAdded">Date added</td>
+            <td></td>
+            <td class="log"></td>
+            <td class="del"></td>
+        </tr>
+      </table>
+      
+    </main>
+    <footer class="app-footer">
+      <span id="indexedDbUsage"></span>
+    </footer>
   </body>
 </html>
