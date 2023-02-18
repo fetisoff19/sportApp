@@ -4,8 +4,8 @@ let filterKey = {
     totalElapsedTime: "Общее время тренировки",
     totalTimerTime: "Время в движении",
     totalDistance: "Расстояние",
-    totalStrides: "Шаги",
-    totalCalories: "Калорий",
+    totalStrides: "Кол-во шагов",
+    totalCalories: "Калории",
     avgSpeed: "Средняя скорость",
     maxSpeed: "Макс. скорость",
     minAltitude: "Мин. высота",
@@ -34,7 +34,7 @@ export function filterValuesForView (workout) {
             if (key in filterKey) {
                 filterArrKey.push(filterKey[key]);
                 filterArrValue.push(workout.sessionMesgs[0][key])
-            } else console.log('Отсутствуют ключи типа keyInSession')
+            }
         }
     else console.log('Отсутствует sessionMesgs в workouts')
     // округляем числа и корректируем дату для отображения

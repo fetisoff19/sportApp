@@ -40,7 +40,10 @@ function addRowToWorkoutsTable(rec) {
       document.querySelector(`tr[data-id="${id}"]`).remove();
       setTimeout(() => {
        setIndexedDbUsageInfo();       // в будущем доработать бзе таймаута
-      },100)
+      },100);
+      if (document.getElementById(`${id}`)) {
+        document.getElementById(`${id}`).remove()
+      }
     });
   });
   tdDel.appendChild(delBtn);
