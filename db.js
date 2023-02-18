@@ -53,3 +53,7 @@ export function setIndexedDbUsageInfo() {
     document.querySelector('#indexedDbUsage').innerHTML = 'indexedDb: '+(result.usageDetails.indexedDB/(10**6)).toFixed(2)+'MB';
   });
 }
+
+export function getObjectStore (os ,id, f) {
+  db.get(os, id).then((r) => f(r));
+}
