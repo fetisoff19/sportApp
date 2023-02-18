@@ -16,10 +16,15 @@ async function initDb() {
       }
       if (!db.objectStoreNames.contains('workoutsData')) {
         const workoutsDataOS = db.createObjectStore('workoutsData', { keyPath: 'id_workouts'});
+        workoutsDataOS.createIndex('sha256','sha256', {unique: true});
       }
     }
 
   });
+}
+
+export function handleDbError(err) {
+  console.error(err);
 }
 
 export async function addWorkout(newWorkout, newWorkoutData) {
@@ -29,13 +34,11 @@ export async function addWorkout(newWorkout, newWorkoutData) {
   const workoutsOS = tx.objectStore('workouts');
   const workoutsDataOS = tx.objectStore('workoutsData');
   //добавляем тренировку, сохраняем id добавленной записи
-  const newWorkoutId = await workoutsOS.add(newWorkout);
+  const newWorkoutId = await workoutsOS.add(newWorkout).catch(handleDbError);
   //записываем id в данные тренировки
   newWorkoutData.id_workouts = newWorkoutId;
-
-
   //добавляем данные тренировки
-  await workoutsDataOS.add(newWorkoutData);
+  await workoutsDataOS.add(newWorkoutData).catch(handleDbError);
   return newWorkoutId;
 }
 
@@ -43,9 +46,9 @@ export async function deleteWorkout(id) {
   const tx = db.transaction(['workouts', 'workoutsData'], 'readwrite');
   const workoutsOS = tx.objectStore('workouts');
   const workoutsDataOS = tx.objectStore('workoutsData');
-  await workoutsOS.delete(id);
+  await workoutsOS.delete(id).catch(handleDbError);
   //удаляем связанные с тренировкой данные
-  await workoutsDataOS.delete(id);
+  await workoutsDataOS.delete(id).catch(handleDbError);
 }
 
 export function setIndexedDbUsageInfo() {

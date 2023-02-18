@@ -14,3 +14,12 @@ export async function parseFit(fitFile) {
   //console.timeEnd('response in');
   return messages;
 }
+
+
+export async function sha256File(file) {
+  const blob = await file.arrayBuffer();
+  const hashBuffer = await window.crypto.subtle.digest('SHA-256', blob);
+  const hashArray = Array.from(new Uint8Array(hashBuffer))
+  const digest = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return digest;
+}

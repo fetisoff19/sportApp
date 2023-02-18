@@ -1,4 +1,4 @@
-import { parseFit } from './utils.js';
+import { parseFit, sha256File } from './utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo, getObjectStore} from './db.js';
 import {filterValuesForView} from "./viewTraining.js";
 
@@ -130,8 +130,11 @@ document.querySelector('#create-workout-fit-inp').addEventListener('change', asy
 
     const filename = file.name.replace('.fit','');
     const newWorkoutData = await parseFit(file);
-    //добавляем параметры из newWorkoutData
 
+    const sha256 = await sha256File(file);
+    newWorkoutData.sha256 = sha256;
+
+    //добавляем параметры из newWorkoutData
     const newWorkout = {name: filename, type: '-', timeCreated: '-', dateAdded: new Date()};
     copyKeyInObj(newWorkoutData, newWorkout)
 
