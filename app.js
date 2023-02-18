@@ -1,7 +1,7 @@
 import { parseFit, sha256File } from './utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo, getObjectStore} from './db.js';
 import {filterValuesForView} from "./viewTraining.js";
-
+import { createMapWithWorkoutRoute } from './components.js';
 
 
 fillWorkoutsTable();
@@ -72,7 +72,7 @@ function addRowToWorkoutsTable(rec) {
   tr.append(tdDel);
   tdView.append(viewBtn);
 
-    viewBtn.addEventListener('click', (e) => {
+    viewBtn.addEventListener('click', async (e) => {
       let id = parseInt(e.target.parentElement.parentElement.dataset.id)
       let section = document.createElement('section')
       let btnEdit = document.createElement('input');
@@ -88,6 +88,8 @@ function addRowToWorkoutsTable(rec) {
       viewBtn.parentElement.parentElement.after(section)
       // section.append(btnEdit)
       getObjectStore('workouts', id, filterValuesForView);
+      const workoutData = await db.get('workoutsData', id);
+      createMapWithWorkoutRoute(workoutData, section);
       btnEdit.onclick = function (){}
 
     } else {
