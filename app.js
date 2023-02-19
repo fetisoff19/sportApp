@@ -1,8 +1,8 @@
-import { parseFit, sha256File } from './utils.js';
+import {parseFit, sha256File } from './utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo, getObjectStore} from './db.js';
-import {filterValuesForView} from "./viewTraining.js";
-import { createMapWithWorkoutRoute } from './components.js';
-
+import {makeTable} from "./viewTraining.js";
+import {createMapWithWorkoutRoute } from './components.js';
+import {copyKeyInObj} from "./makeWorkout.js";
 
 fillWorkoutsTable();
 setIndexedDbUsageInfo();
@@ -20,7 +20,9 @@ function addRowToWorkoutsTable(rec) {
   let tdType = document.createElement('td');
   let tdTimeCreated = document.createElement('td');
   let tdDateAdded = document.createElement('td');
+  let tdNote = document.createElement('td');
   let tdLog = document.createElement('td');
+  //кнопка вывода workout в консоль-лог
   let logBtn = document.createElement('input');
   logBtn.type = 'button';
   logBtn.value = 'log';
@@ -30,6 +32,7 @@ function addRowToWorkoutsTable(rec) {
     db.get('workoutsData', id).then(result=>console.log(result));
   });
   tdLog.appendChild(logBtn);
+  //кнопка удаления тренировки
   let tdDel = document.createElement('td');
   let delBtn = document.createElement('input');
   delBtn.type = 'button';
@@ -47,47 +50,35 @@ function addRowToWorkoutsTable(rec) {
     });
   });
   tdDel.appendChild(delBtn);
-
+  //наполнение заголовков таблицы
   tdId.innerHTML = rec.id;
   tdName.innerHTML = rec.name;
-  tdType.innerHTML = rec.type;
-  tdTimeCreated.innerHTML = rec.timeCreated.toLocaleString("en-GB");
-  tdDateAdded.innerHTML = rec.dateAdded.toLocaleString("en-GB");
-
+  tdType.innerHTML = rec.sport;
+  tdTimeCreated.innerHTML = rec.startTime;
+  tdDateAdded.innerHTML = rec.dateAdded;
+  tdNote.innerHTML = rec.note;
   //кнопка просмотра тренировки
   let viewStatus = true;
   let tdView = document.createElement('td');
   let viewBtn = document.createElement('input');
   viewBtn.type = 'button';
   viewBtn.value = 'view';
-
-  document.querySelector('#workoutsTable').append(tr);
-  tr.append(tdId);
-  tr.append(tdName);
-  tr.append(tdType);
-  tr.append(tdTimeCreated);
-  tr.append(tdDateAdded);
-  tr.append(tdView);
-  tr.append(tdLog);
-  tr.append(tdDel);
-  tdView.append(viewBtn);
-
-    viewBtn.addEventListener('click', async (e) => {
-      let id = parseInt(e.target.parentElement.parentElement.dataset.id)
-      let section = document.createElement('section')
-      let btnEdit = document.createElement('input');
-      section.setAttribute('class', 'viewTable')
-      section.setAttribute('id',`${rec.id}`)
-      section.innerHTML = 'Тренировка: ' + `${rec.id}`;
-      btnEdit.type = 'button';
-      btnEdit.value = 'edit';
+  viewBtn.addEventListener('click', async (e) => {
+    let id = parseInt(e.target.parentElement.parentElement.dataset.id)
+    let section = document.createElement('section')
+    let btnEdit = document.createElement('input');
+    section.setAttribute('class', 'viewTable')
+    section.setAttribute('id',`${rec.id}`)
+    section.innerHTML = 'Тренировка: ' + `${rec.id}`;
+    btnEdit.type = 'button';
+    btnEdit.value = 'edit';
 
     if (viewStatus) {
       viewStatus = false;
       viewBtn.value = 'close';
       viewBtn.parentElement.parentElement.after(section)
       // section.append(btnEdit)
-      getObjectStore('workouts', id, filterValuesForView);
+      getObjectStore('workouts', id, makeTable);
       const workoutData = await db.get('workoutsData', id);
       createMapWithWorkoutRoute(workoutData, section);
       btnEdit.onclick = function (){}
@@ -98,6 +89,18 @@ function addRowToWorkoutsTable(rec) {
       document.getElementById(`${rec.id}`).remove()
     }
   });
+  //добавление элементов в DOM
+  document.querySelector('#workoutsTable').append(tr);
+  tr.append(tdId);
+  tr.append(tdName);
+  tr.append(tdType);
+  tr.append(tdTimeCreated);
+  tr.append(tdDateAdded);
+  tr.append(tdNote);
+  tr.append(tdView);
+  tr.append(tdLog);
+  tr.append(tdDel);
+  tdView.append(viewBtn);
 }
 
 async function saveJsonFileFromFit(file) {
@@ -116,16 +119,6 @@ async function saveJsonFileFromFit(file) {
   await fileStream.close();
 }
 
-//копирование ключей тренировки
-function copyKeyInObj(origObj, newObj) {
-  if (!origObj) console.log('пустой объект')
-  else
-    for (let key in origObj) {
-      if (origObj[key].length < 2) {
-        newObj[key] = origObj[key]}
-    }
-}
-
 //создание тренировки(-ок) из файла
 document.querySelector('#create-workout-fit-inp').addEventListener('change', async (event) => {
   for (let file of event.target.files) {
@@ -137,15 +130,8 @@ document.querySelector('#create-workout-fit-inp').addEventListener('change', asy
     newWorkoutData.sha256 = sha256;
 
     //добавляем параметры из newWorkoutData
-    const newWorkout = {name: filename, type: '-', timeCreated: '-', dateAdded: new Date()};
+    const newWorkout = {name: filename};
     copyKeyInObj(newWorkoutData, newWorkout)
-
-    if (newWorkoutData.fileIdMesgs[0].timeCreated && 'fileIdMesgs' in newWorkoutData)
-      newWorkout.timeCreated = newWorkoutData.fileIdMesgs[0].timeCreated;
-
-    if ('deviceSettingsMesgs' in newWorkoutData
-        && newWorkoutData.deviceSettingsMesgs[0].autoActivityDetect)
-      newWorkout.type = newWorkoutData.deviceSettingsMesgs[0].autoActivityDetect;
 
       //создаем объект тренировки
 

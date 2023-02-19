@@ -51,6 +51,8 @@ export async function deleteWorkout(id) {
   await workoutsDataOS.delete(id).catch(handleDbError);
 }
 
+
+//ф-я отображения размера локального хранилища
 export function setIndexedDbUsageInfo() {
   navigator.storage.estimate().then(result=>{
     document.querySelector('#indexedDbUsage').innerHTML = 'indexedDb: '+(result.usageDetails.indexedDB/(10**6)).toFixed(2)+'MB';

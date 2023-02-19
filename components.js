@@ -17,8 +17,9 @@ export function createMapWithWorkoutRoute(workoutData, appendTo) {
   let mapElement = document.createElement('div');
   mapElement.id=`map-${workoutData.id_workouts}`;
   mapElement.style.height = '180px';
+  // mapElement.style.width = '800px';
   appendTo.appendChild(mapElement);
-  var map = L.map(mapElement.id).setView(startCoordinates, startZoom);
+  let map = L.map(mapElement.id).setView(startCoordinates, startZoom);
 
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
