@@ -6,11 +6,14 @@
   --light-grey-bg: rgb(240, 240, 240);
 }
 
-body {margin: 0;}
+body {
+  margin: 0;
+}
 
 html {font: 16px helvetica, arial, sans serif;}
 
 main {
+  margin: 0 10% auto;
   min-height: calc(100vh - var(--header-height) - var(--footer-height));
 }
 
@@ -24,7 +27,7 @@ main {
   height: var(--header-height);
   background-color: var(--app-color);
   color: var(--light-font);
-  padding: 0 1rem;
+  padding-left: 10%;
 }
 
 .app-logo {
@@ -41,7 +44,7 @@ main {
   bottom: 0;
   height: var(--footer-height);
   background-color: var(--light-grey-bg);
-  padding: 0 1rem;
+  padding-left: 10%;
 }
 
 
@@ -49,10 +52,44 @@ h1 {
 	color: var(--app-color);
 }
 
+.viewTable {
+  overflow-x: scroll;
+}
+
 table {
+    width: 1200px;
 	display: inline-block;
 }
 
 td {
 	padding: 2px;
+}
+
+
+
+/*TrainingInput style*/
+.inputTd {
+  display: block;
+  margin: 0 auto;
+  padding: 5px;
+  background: #e1e1e1;
+  font-size: 1rem;
+}
+/*.inputTd > h3 {*/
+/* */
+/*}*/
+
+.inputDiv {
+  column-count: 3;
+  margin: 0 auto;
+  padding: 5px;
+}
+
+.inputDiv > div {
+  padding: 10px;
+}
+
+.inputLabel > label {
+  font-size: 1rem;
+  display: block;
 }

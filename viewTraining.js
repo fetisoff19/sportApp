@@ -1,6 +1,4 @@
-import {TrainingInput} from "./editTraining.js";
-
-let filterKey = {
+export let filterKey = {
     timestamp: "Начало занятия",
     startTime: "Окончание занятия",
     totalElapsedTime: "Общее время тренировки",
@@ -28,8 +26,8 @@ let filterKey = {
     dateAdded: "Занятие загружено",
     note: "Примечание",
     id: "id",
+    editDate: "Занятие изменено",
 }
-
 
 export function makeTable(obj) {
     let tr1 = document.createElement('tr');
@@ -49,9 +47,8 @@ export function makeTable(obj) {
         td.innerHTML = obj[key];
         tr2.append(td)
     }
-    //добавлено для пробы
-    let trainingInput = new TrainingInput(obj, elem);
-    trainingInput.addDiv()
 }
+
+
 
 

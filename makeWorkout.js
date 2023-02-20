@@ -23,6 +23,7 @@ let filterArrForWorkouts = [
     'maxCadence',
     'avgRunningCadence',
     'note',
+    'editDate',
 ]
 
 export function copyKeyInObj(origObj, newObj) {

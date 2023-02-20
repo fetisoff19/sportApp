@@ -1,9 +1,10 @@
 import {db} from "./db.js";
+import {filterKey} from "./viewTraining.js";
 
 let inputKey = ['name', 'sport', 'note',]
 
-
-export class TrainingInput {
+export class DivInput {
+    //obj - объект с данными, elem - элемент для привязки кнопки
     constructor(obj, elem) {
         let td = document.createElement('td');
         let div = document.createElement('div')
@@ -12,6 +13,8 @@ export class TrainingInput {
         // let table = document.createElement('table');
         // let tr = document.createElement('tr');
         h3.innerHTML = 'Изменение тренировки ' + obj.name;
+        //`${'td' + obj.id}` понадобится для удаления элемента со страницы
+        td.classList.add("inputTd", `${'td' + obj.id}`);
         div.classList.add("inputDiv");
 
         for (let key of inputKey) {
@@ -19,7 +22,8 @@ export class TrainingInput {
             let label = document.createElement('label');
             let input = document.createElement('input');
 
-            label.innerHTML = key
+            elemDiv.classList.add('inputLabel')
+            label.innerHTML = filterKey[key]
             input.type = 'text';
             input.value = obj[key];
             input.classList.add(key, obj.id);
@@ -40,9 +44,10 @@ export class TrainingInput {
         // this.label = label;
         // this.input = input;
     }
-    addDiv() {
-        this.elem.prepend(this.td);
-        this.td.append(this.h3, this.div);
+    addAfter() {
+        this.elem.after(this.td);
+        this.td.append(this.h3)
+        this.h3.append(this.div);
     }
 }
 
@@ -51,6 +56,7 @@ function changeValues (input) {
     let id = +input.classList[1]
     db.get('workouts', id).then((r) => {
        r[key] = input.value;
+       r.editDate = (new Date).toLocaleString("en-GB");
        db.put('workouts', r)
     });
 }
