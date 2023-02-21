@@ -1,6 +1,6 @@
 export let filterKey = {
-    timestamp: "Начало занятия",
-    startTime: "Окончание занятия",
+    timestamp: "Окончание занятия",
+    startTime: "Начало занятия",
     totalElapsedTime: "Общее время тренировки",
     totalTimerTime: "Время в движении",
     totalDistance: "Расстояние",
@@ -27,6 +27,7 @@ export let filterKey = {
     note: "Примечание",
     id: "id",
     editDate: "Занятие изменено",
+    manual: "Добавлено вручную?",
 }
 
 export function makeTable(obj) {

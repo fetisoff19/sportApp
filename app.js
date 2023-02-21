@@ -1,7 +1,7 @@
 import {parseFit, sha256File } from './utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo, getObjectStore} from './db.js';
 import {copyKeyInObj} from "./makeWorkout.js";
-import {Button, log, del, view, edit} from "./button.js";
+import {Button, log, del, view, edit, openCreateForm} from "./button.js";
 
 fillWorkoutsTable();
 setIndexedDbUsageInfo();
@@ -27,13 +27,13 @@ function addRowToWorkoutsTable(rec) {
 
   //объявление кнопок
   let viewBtn = new Button('view', tdView, view, true)
-  viewBtn.addAppendChild()
+  viewBtn.addAppend()
   let editBtn = new Button('edit', tdEdit, edit, true, rec)
-  editBtn.addAppendChild()
+  editBtn.addAppend()
   let logBtn = new Button('log', tdLog, log)
-  logBtn.addAppendChild()
+  logBtn.addAppend()
   let delBtn = new Button('del', tdDel, del)
-  delBtn.addAppendChild()
+  delBtn.addAppend()
 
   //наполнение заголовков таблицы
   tdId.innerHTML = rec.id;
@@ -95,3 +95,8 @@ document.querySelector('#fit-to-json-file-inp')
     .addEventListener('change',
         (e)=>saveJsonFileFromFit(e.target.files[0])
 );
+
+let addManual = document.getElementById('addManual');
+let createBtn = new Button('add', addManual, openCreateForm)
+createBtn.addAppend()
+

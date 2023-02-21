@@ -1,7 +1,16 @@
 import {db, deleteWorkout, getObjectStore, setIndexedDbUsageInfo} from "./db.js";
 import {makeTable} from "./viewTraining.js";
 import {createMapWithWorkoutRoute} from "./components.js";
-import {DivInput} from "./editTraining.js";
+import {DivInput, inputEditKey} from "./editTraining.js";
+
+export let inputCreateKey = [
+    'name',
+    'sport',
+    'totalDistance',
+    'totalElapsedTime',
+    'startTime',
+    'note',
+]
 
 export class Button {
     //status (string) используем для изменения состояния кнопки
@@ -18,7 +27,7 @@ export class Button {
         this.text = text;
     }
 
-    addAppendChild() {
+    addAppend() {
         this.elem.append(this.btn);
     }
 }
@@ -65,27 +74,19 @@ export async function view(e){
     }
 }
 
-export async function edit(e, obj){
-    let elem = e.target.parentElement.parentElement
-    let btn = e.target;
-    let status = btn.classList;
+export async function edit(e, obj) {
+    if (document.querySelector(`.${'td' + obj.id}`)) return
     //добавляем инпуты для изменения тренировки
-    let divInput = new DivInput(obj, elem);
+    let elem = e.target.parentElement.parentElement;
+    let divInput = new DivInput(elem, inputEditKey, obj);
     divInput.addAfter()
+}
 
-    if (status[2] === 'true') {
-        status.replace('true', 'false')
-        btn.innerText = 'save';
-    } else {
-        status.replace('false', 'true')
-        btn.innerText = 'edit';
-        //getElementById.remove() удаляет элемент живой коллекции
-        //здесь это не работает, значит используем querySelectorAll
-        let inputTd = document.querySelectorAll(`.${'td' + obj.id}`)
-        for (let elem of inputTd) {
-            elem.remove();
-            // обновим страницу, в будущем нужно обновлять только строку с элементом
-            window.location.reload()
-        }
-    }
+export function openCreateForm (e) {
+    if (document.querySelector('.createForm')) return
+
+    let h1 = document.querySelector('h1');
+    let manualForm = new DivInput(h1, inputCreateKey);
+    manualForm.addAfter();
+
 }
