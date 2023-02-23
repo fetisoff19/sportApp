@@ -1,7 +1,16 @@
 import {parseFit, sha256File } from './utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo, getObjectStore} from './db.js';
 import {copyKeyInObj} from "./makeWorkout.js";
-import {Button, log, del, view, edit, openCreateForm} from "./button.js";
+import {ButtonComponent, log, del, view, edit, inputCreateKey} from "./buttonComponent.js";
+import {changeTextToDistance, DivLabelInput} from "./inputComponent.js";
+import {formatDateForInput} from "./functionsDate.js";
+import {FormComponent, openCreateForm} from "./formComponent.js";
+import {inputEditKey} from "./editTraining.js";
+import {filterKey, otherWord, setLanguage, } from "./language.js";
+
+setLanguage('ru')
+
+
 
 fillWorkoutsTable();
 setIndexedDbUsageInfo();
@@ -26,14 +35,14 @@ function addRowToWorkoutsTable(rec) {
   let tdDel = document.createElement('td');
 
   //объявление кнопок
-  let viewBtn = new Button('view', tdView, view, true)
-  viewBtn.addAppend()
-  let editBtn = new Button('edit', tdEdit, edit, true, rec)
-  editBtn.addAppend()
-  let logBtn = new Button('log', tdLog, log)
-  logBtn.addAppend()
-  let delBtn = new Button('del', tdDel, del)
-  delBtn.addAppend()
+  let viewBtn = new ButtonComponent('view', view, true)
+  viewBtn.addAppend(tdView)
+  let editBtn = new ButtonComponent('edit',  edit, true, rec)
+  editBtn.addAppend(tdEdit)
+  let logBtn = new ButtonComponent('log', log)
+  logBtn.addAppend(tdLog)
+  let delBtn = new ButtonComponent('del', del)
+  delBtn.addAppend(tdDel)
 
   //наполнение заголовков таблицы
   tdId.innerHTML = rec.id;
@@ -45,16 +54,8 @@ function addRowToWorkoutsTable(rec) {
 
   //добавление элементов в DOM
   document.querySelector('#workoutsTable').append(tr);
-  tr.append(tdId);
-  tr.append(tdName);
-  tr.append(tdType);
-  tr.append(tdTimeCreated);
-  tr.append(tdDateAdded);
-  tr.append(tdNote);
-  tr.append(tdEdit);
-  tr.append(tdView);
-  tr.append(tdLog);
-  tr.append(tdDel);
+  tr.append(tdId, tdName, tdType, tdTimeCreated,
+    tdDateAdded, tdNote, tdEdit, tdView, tdLog, tdDel);
 }
 
 async function saveJsonFileFromFit(file) {
@@ -96,7 +97,11 @@ document.querySelector('#fit-to-json-file-inp')
         (e)=>saveJsonFileFromFit(e.target.files[0])
 );
 
+
 let addManual = document.getElementById('addManual');
-let createBtn = new Button('add', addManual, openCreateForm)
-createBtn.addAppend()
+let createBtn = new ButtonComponent('add', openCreateForm)
+createBtn.addAppend(addManual)
+
+
+
 

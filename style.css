@@ -90,3 +90,53 @@ td {
   font-size: 1rem;
   display: block;
 }
+
+
+/*.form {*/
+  /*width: 1200px;*/
+  /*display: block;*/
+  /*margin: 0 auto;*/
+  /*padding: 5px;*/
+/*}*/
+
+/*.form div {*/
+/*  display: block;*/
+/*  column-count: 4;*/
+/*}*/
+
+/*.input {*/
+/*  display: flex;*/
+/*}*/
+
+.form {
+  width: 1200px;
+  background: #e1e1e1;
+}
+
+.form-container {
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  font-size: 1rem;
+  padding: 1rem;
+}
+
+.form-container div {
+  width: 25%;
+  padding: 1rem;
+}
+
+.form-container div label {
+  display: block;
+}
+
+/*.sport input {width: 200px;}*/
+
+/*.test {*/
+/*  column-count: 3;*/
+/*  margin: 0 auto;*/
+/*  padding: 5px;*/
+/*}*/

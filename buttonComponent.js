@@ -1,7 +1,7 @@
 import {db, deleteWorkout, getObjectStore, setIndexedDbUsageInfo} from "./db.js";
 import {makeTable} from "./viewTraining.js";
 import {createMapWithWorkoutRoute} from "./components.js";
-import {DivInput, inputEditKey} from "./editTraining.js";
+import {inputEditKey} from "./editTraining.js";
 
 export let inputCreateKey = [
     'name',
@@ -12,24 +12,25 @@ export let inputCreateKey = [
     'note',
 ]
 
-export class Button {
+export class ButtonComponent {
     //status (string) используем для изменения состояния кнопки
     //elem - элемент для привязки кнопки
-    constructor(text, elem, f, status, obj) {
+    constructor(text, f, status, options) {
         let btn = document.createElement('button')
         btn.classList.add('button', text, status);
         btn.innerText = text;
-        btn.addEventListener('click', (e) => f(e,obj))
+        btn.addEventListener('click', (e) => f(e, options))
 
         this.options = status;
         this.btn = btn;
-        this.elem = elem;
         this.text = text;
+     }
+
+    addAppend(elem) {
+        elem.append(this.btn);
     }
 
-    addAppend() {
-        this.elem.append(this.btn);
-    }
+
 }
 
 export function log(e) {
@@ -82,11 +83,11 @@ export async function edit(e, obj) {
     divInput.addAfter()
 }
 
-export function openCreateForm (e) {
-    if (document.querySelector('.createForm')) return
-
-    let h1 = document.querySelector('h1');
-    let manualForm = new DivInput(h1, inputCreateKey);
-    manualForm.addAfter();
-
-}
+// export function openCreateForm (e) {
+//     if (document.querySelector('.createForm')) return
+//
+//     let h1 = document.querySelector('h1');
+//     let manualForm = new DivInput(h1, inputCreateKey);
+//     manualForm.addAfter();
+//
+// }
