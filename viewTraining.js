@@ -1,4 +1,6 @@
-import {filterKey} from "./language.js";
+import {filterKey, otherWord} from "./language.js";
+import {db, getObjectStore} from "./db.js";
+import {createMapWithWorkoutRoute} from "./components.js";
 
 
 export function makeTable(obj) {
@@ -18,6 +20,28 @@ export function makeTable(obj) {
         let td = document.createElement('td');
         td.innerHTML = obj[key];
         tr2.append(td)
+    }
+}
+
+export async function openView(e){
+    let btn = e.target;
+    let status = btn.classList;
+    let id = parseInt(e.target.parentElement.parentElement.dataset.id)
+    let viewTable = document.createElement('div');
+    viewTable.setAttribute('class', 'viewTable')
+    viewTable.setAttribute('id',`${id}`)
+    viewTable.innerHTML = 'Тренировка: ' + id;
+    if (status[2] === 'true') {
+        status.replace('true', 'false')
+        btn.innerText = otherWord.close;
+        btn.parentElement.parentElement.after(viewTable);
+        getObjectStore('workouts', id, makeTable);
+        const workoutData = await db.get('workoutsData', +id);
+        createMapWithWorkoutRoute(workoutData, viewTable);
+    } else {
+        status.replace('false', 'true')
+        btn.innerText = otherWord.view;
+        document.getElementById(`${id}`).remove()
     }
 }
 

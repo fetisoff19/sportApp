@@ -1,13 +1,11 @@
-import {formatDateForInput} from "./functionsDate.js";
-import {otherWord} from "./language.js";
-
 export class DivLabelInput {
         constructor(...classes) {
         let div = document.createElement('div');
         let label = document.createElement('label');
         let input = document.createElement('input');
 
-        div.classList.add('input', ...classes)
+        input.required = true;
+        input.classList.add('input', ...classes)
 
         div.append(label,input)
         this.div = div;
@@ -41,7 +39,6 @@ export class DivLabelInput {
     this.input.value = value;
   }
 
-
   setInputList(id, values, defaultSport) {
         this.input.type = 'list';
 
@@ -66,8 +63,9 @@ export class DivLabelInput {
     }
 
     //временное решение
-    setTextArea(obj){
+    setTextArea(obj, ...classes){
       let textArea = document.createElement('textarea');
+      textArea.classList.add('input', ...classes)
       this.label.append(textArea);
       this.input.remove();
       if (obj) {
@@ -78,8 +76,29 @@ export class DivLabelInput {
    }
 }
 
-
 export function changeTextToDistance (value) {
   if (value > 9999) return value = 9999;
   return value.replace(/[^\d\,. ]/g, '');
+}
+
+
+export class InputSubmit {
+  constructor(text, f, options) {
+    let input = document.createElement('input');
+
+    input.type = 'submit';
+    input.classList.add('submit')
+    input.value = text;
+    input.addEventListener('click', (e) => f(e, options))
+
+    this.input = input;
+    this.input.innerHTML = text;
+  }
+
+  addAppend(elem) {
+    elem.append(this.input);
+  }
+  addInputClasses(...classes) {
+    input.classList.add(...classes)
+  }
 }

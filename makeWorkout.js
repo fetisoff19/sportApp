@@ -27,7 +27,6 @@ let filterArrForWorkouts = [
 ]
 
 export function copyKeyInObj(origObj, newObj) {
-    origObj.id = newObj.id;
     newObj.dateAdded = new Date();
     newObj.note = '';
     if ('sessionMesgs' in origObj
@@ -44,9 +43,10 @@ export function copyKeyInObj(origObj, newObj) {
 
 function filterValuesWorkout (workout) {
     for (let key in workout) {
-        if (typeof workout[key] === 'object') {
-            workout[key] = workout[key].toLocaleString("en-GB");
-        } else if
+        if
+        // (typeof workout[key] === 'object') {
+        //     workout[key] = workout[key].toLocaleString("en-GB");
+        // } else if
         (typeof workout[key] === 'number'
             && workout[key].toString().length > 12) {
             workout[key] = workout[key].toFixed(0);

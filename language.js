@@ -30,16 +30,24 @@ let filterKeyRu = {
   dateAdded: "Занятие загружено",
   note: "Описание",
   id: "id",
-  editDate: "Занятие изменено",
+  dateEdit: "Занятие изменено",
   manual: "Добавлено вручную?",
 }
 
 let otherWordRu = {
   createTraining: 'Создание тренировки',
+  editTraining: 'Изменение тренировки',
   placeholderText: 'Необходимо заполнить',
   placeholderTime: 'чч:мм',
   placeholderDistance: 'км',
   placeholderNote: 'О тренировке',
+  close: 'Закрыть',
+  save: 'Сохранить',
+  edit: 'Изменить',
+  add: 'Добавить',
+  view: 'Показать',
+  delete: 'Удалить',
+  log: 'Log',
 }
 
 let sportTypeRu = {

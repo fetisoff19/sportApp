@@ -1,5 +1,5 @@
 export function formatDateForInput(dateObj) {
-    return new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000 ))
+     return new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000 ))
         .toISOString()
         .split("T")[0];
 }

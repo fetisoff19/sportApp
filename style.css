@@ -65,49 +65,7 @@ td {
 	padding: 2px;
 }
 
-
-
 /*TrainingInput style*/
-.inputTd {
-  display: block;
-  margin: 0 auto;
-  padding: 5px;
-  background: #e1e1e1;
-  font-size: 1rem;
-}
-
-.inputDiv {
-  column-count: 3;
-  margin: 0 auto;
-  padding: 5px;
-}
-
-.inputDiv > div {
-  padding: 10px;
-}
-
-.inputLabel > label {
-  font-size: 1rem;
-  display: block;
-}
-
-
-/*.form {*/
-  /*width: 1200px;*/
-  /*display: block;*/
-  /*margin: 0 auto;*/
-  /*padding: 5px;*/
-/*}*/
-
-/*.form div {*/
-/*  display: block;*/
-/*  column-count: 4;*/
-/*}*/
-
-/*.input {*/
-/*  display: flex;*/
-/*}*/
-
 .form {
   width: 1200px;
   background: #e1e1e1;
@@ -132,11 +90,3 @@ td {
 .form-container div label {
   display: block;
 }
-
-/*.sport input {width: 200px;}*/
-
-/*.test {*/
-/*  column-count: 3;*/
-/*  margin: 0 auto;*/
-/*  padding: 5px;*/
-/*}*/

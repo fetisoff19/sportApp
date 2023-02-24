@@ -1,17 +1,12 @@
 import {parseFit, sha256File } from './utils.js';
-import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo, getObjectStore} from './db.js';
+import {db, addWorkout, setIndexedDbUsageInfo} from './db.js';
 import {copyKeyInObj} from "./makeWorkout.js";
-import {ButtonComponent, log, del, view, edit, inputCreateKey} from "./buttonComponent.js";
-import {changeTextToDistance, DivLabelInput} from "./inputComponent.js";
-import {formatDateForInput} from "./functionsDate.js";
-import {FormComponent, openCreateForm} from "./formComponent.js";
-import {inputEditKey} from "./editTraining.js";
-import {filterKey, otherWord, setLanguage, } from "./language.js";
+import {ButtonComponent, log, del} from "./buttonComponent.js";
+import {otherWord, setLanguage, } from "./language.js";
+import {openView} from "./viewTraining.js";
+import {openCreateForm, openEditForm} from "./formFunction.js";
 
 setLanguage('ru')
-
-
-
 fillWorkoutsTable();
 setIndexedDbUsageInfo();
 
@@ -34,14 +29,14 @@ function addRowToWorkoutsTable(rec) {
   let tdLog = document.createElement('td');
   let tdDel = document.createElement('td');
 
-  //объявление кнопок
-  let viewBtn = new ButtonComponent('view', view, true)
+  // объявление кнопок
+  let viewBtn = new ButtonComponent(otherWord.view, openView, true)
   viewBtn.addAppend(tdView)
-  let editBtn = new ButtonComponent('edit',  edit, true, rec)
+  let editBtn = new ButtonComponent(otherWord.edit,  openEditForm, true, rec.id)
   editBtn.addAppend(tdEdit)
-  let logBtn = new ButtonComponent('log', log)
+  let logBtn = new ButtonComponent(otherWord.log, log)
   logBtn.addAppend(tdLog)
-  let delBtn = new ButtonComponent('del', del)
+  let delBtn = new ButtonComponent(otherWord.delete, del)
   delBtn.addAppend(tdDel)
 
   //наполнение заголовков таблицы
@@ -97,9 +92,8 @@ document.querySelector('#fit-to-json-file-inp')
         (e)=>saveJsonFileFromFit(e.target.files[0])
 );
 
-
 let addManual = document.getElementById('addManual');
-let createBtn = new ButtonComponent('add', openCreateForm)
+let createBtn = new ButtonComponent(otherWord.add, openCreateForm)
 createBtn.addAppend(addManual)
 
 
