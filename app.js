@@ -1,12 +1,12 @@
 import {parseFit, sha256File } from './utils.js';
-import {db, addWorkout, setIndexedDbUsageInfo} from './db.js';
+import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo} from './db.js';
 import {copyKeyInObj} from "./makeWorkout.js";
 import {ButtonComponent} from "./components/buttonComponent.js";
 import {otherWord, setLanguage, } from "./language.js";
 import {openView} from "./viewTraining.js";
 import {openCreateForm, openEditForm} from "./formFunction.js";
 
-setLanguage('ru')
+setLanguage('ru');
 fillWorkoutsTable();
 setIndexedDbUsageInfo();
 
@@ -30,14 +30,14 @@ function addRowToWorkoutsTable(rec) {
   let tdDel = document.createElement('td');
 
   // объявление кнопок
-  let viewBtn = new ButtonComponent(otherWord.view, openView, true)
-  viewBtn.addAppend(tdView)
-  let editBtn = new ButtonComponent(otherWord.edit,  openEditForm, true, rec.id)
-  editBtn.addAppend(tdEdit)
-  let logBtn = new ButtonComponent(otherWord.log, log)
-  logBtn.addAppend(tdLog)
-  let delBtn = new ButtonComponent(otherWord.delete, del)
-  delBtn.addAppend(tdDel)
+  let viewBtn = new ButtonComponent(otherWord.view, openView, true);
+  viewBtn.addAppend(tdView);
+  let editBtn = new ButtonComponent(otherWord.edit,  openEditForm, true, rec.id);
+  editBtn.addAppend(tdEdit);
+  let logBtn = new ButtonComponent(otherWord.log, log);
+  logBtn.addAppend(tdLog);
+  let delBtn = new ButtonComponent(otherWord.delete, del);
+  delBtn.addAppend(tdDel);
 
   //наполнение заголовков таблицы
   tdId.innerHTML = rec.id;
@@ -61,10 +61,10 @@ function log(e) {
   db.get('workoutsData', id).then(result=> {
       if (!result) {
           db.get('workouts', id).then(result=> {
-              console.log(result)
+              console.log(result);
           })
-      } else console.log(result)
-  })
+      } else console.log(result);
+  });
 }
 
 function del(e) {
@@ -104,7 +104,7 @@ document.querySelector('#create-workout-fit-inp').addEventListener('change', asy
     newWorkoutData.sha256 = sha256;
     //добавляем параметры из newWorkoutData
     const newWorkout = {name: filename};
-    copyKeyInObj(newWorkoutData, newWorkout)
+    copyKeyInObj(newWorkoutData, newWorkout);
     //создаем объект тренировки
     const newRecId = await addWorkout(newWorkout, newWorkoutData);
     db.get('workouts', newRecId).then(rec=>{
@@ -120,8 +120,8 @@ document.querySelector('#fit-to-json-file-inp')
 );
 
 let addManual = document.getElementById('addManual');
-let createBtn = new ButtonComponent(otherWord.add, openCreateForm)
-createBtn.addAppend(addManual)
+let createBtn = new ButtonComponent(otherWord.add, openCreateForm);
+createBtn.addAppend(addManual);
 
 
 
