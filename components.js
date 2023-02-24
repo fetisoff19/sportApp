@@ -2,8 +2,6 @@ import * as L from './modules/leaflet/leaflet-src.esm.js';
 
 export function createMapWithWorkoutRoute(workoutData, appendTo) {
   const garminCoorToNormal = (gl)=>gl/11930465;
-  // if для тренировок, добавленных вручную
-  if (!workoutData.recordMesgs) return;
   const polylinePoints = [];
   for (let rec of workoutData.recordMesgs) {
     if (!rec.hasOwnProperty('positionLat')) continue;

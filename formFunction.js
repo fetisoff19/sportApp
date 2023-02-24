@@ -83,23 +83,26 @@ export function saveForm(e, id){
   let form = e.target.parentElement.parentElement;
   let inputs = form.querySelectorAll('.input');
   for (let input of inputs) {
+    if (!input.checkValidity()) return;
     let key = input.classList[1];
     if (key === 'totalDistance') {
       obj[key] = input.value * 1000
     }
     else if (key === 'totalElapsedTime') {
       obj[key] = changeInputTimeToSeconds(input.value)
+    } else if (key === 'startTime') {
+      obj[key] = new Date(input.value)
     } else obj[key] = input.value
   }
   if (form.classList.contains('createForm')) {
     obj.isManual = true;
-    obj.dateAdded = (new Date);
+    obj.dateAdded = new Date;
     db.add('workouts', obj);
   }
   else {
     db.get('workouts', id).then((r) => {
       Object.assign(r, obj)
-      r.dateEdit = (new Date);
+      r.dateEdit = new Date;
       db.put('workouts', r)
     })
   }

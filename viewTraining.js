@@ -37,7 +37,7 @@ export async function openView(e){
         btn.parentElement.parentElement.after(viewTable);
         getObjectStore('workouts', id, makeTable);
         const workoutData = await db.get('workoutsData', +id);
-        createMapWithWorkoutRoute(workoutData, viewTable);
+        if(workoutData) createMapWithWorkoutRoute(workoutData, viewTable);
     } else {
         status.replace('false', 'true')
         btn.innerText = otherWord.view;
