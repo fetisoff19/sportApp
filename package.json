@@ -1,0 +1,24 @@
+{
+  "name": "sportapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fetisoff19/sportApp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fetisoff19/sportApp/issues"
+  },
+  "homepage": "https://github.com/fetisoff19/sportApp#readme",
+  "dependencies": {
+    "@garmin-fit/sdk": "^21.107.0",
+    "idb": "^7.1.1",
+    "leaflet": "^1.9.3"
+  }
+}

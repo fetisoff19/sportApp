@@ -1,9 +1,9 @@
-import {changeTextToDistance, DivLabelInput, InputSubmit} from "./inputComponent.js";
+import {changeTextToDistance, DivLabelInput, InputSubmit} from "./components/inputComponent.js";
 import {filterKey, otherWord, sportType} from "./language.js";
-import {ButtonComponent} from "./buttonComponent.js";
+import {ButtonComponent} from "./components/buttonComponent.js";
 import {formatDateForInput} from "./functionsDate.js";
 import {db} from "./db.js";
-import {FormComponent} from "./formComponent.js";
+import {FormComponent} from "./components/formComponent.js";
 
 export function openCreateForm () {
   if (document.querySelector('.createForm')) return

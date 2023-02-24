@@ -1,7 +1,7 @@
 import {parseFit, sha256File } from './utils.js';
 import {db, addWorkout, setIndexedDbUsageInfo} from './db.js';
 import {copyKeyInObj} from "./makeWorkout.js";
-import {ButtonComponent, log, del} from "./buttonComponent.js";
+import {ButtonComponent} from "./components/buttonComponent.js";
 import {otherWord, setLanguage, } from "./language.js";
 import {openView} from "./viewTraining.js";
 import {openCreateForm, openEditForm} from "./formFunction.js";
@@ -51,6 +51,33 @@ function addRowToWorkoutsTable(rec) {
   document.querySelector('#workoutsTable').append(tr);
   tr.append(tdId, tdName, tdType, tdTimeCreated,
     tdDateAdded, tdNote, tdEdit, tdView, tdLog, tdDel);
+}
+
+//функции, которые пока что некуда по смыслу распределить
+function log(e) {
+  let id = parseInt(e.target.parentElement.parentElement.dataset.id);
+  //в idb у db есть методы для быстрых одиночных операций (не нужно создавать транзакцию вручную)
+  // https://github.com/jakearchibald/idb#shortcuts-to-getset-from-an-object-store
+  db.get('workoutsData', id).then(result=> {
+      if (!result) {
+          db.get('workouts', id).then(result=> {
+              console.log(result)
+          })
+      } else console.log(result)
+  })
+}
+
+function del(e) {
+  let id = parseInt(e.target.parentElement.parentElement.dataset.id);
+  deleteWorkout(id).then(()=>{
+      document.querySelector(`tr[data-id="${id}"]`).remove();
+      setTimeout(() => {
+          setIndexedDbUsageInfo();       // в будущем доработать бзе таймаута
+      },100);
+      if (document.getElementById(`${id}`)) {
+          document.getElementById(`${id}`).remove()
+      }
+  });
 }
 
 async function saveJsonFileFromFit(file) {

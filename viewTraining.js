@@ -1,6 +1,6 @@
 import {filterKey, otherWord} from "./language.js";
 import {db, getObjectStore} from "./db.js";
-import {createMapWithWorkoutRoute} from "./components.js";
+import {createMapWithWorkoutRoute} from "./components/maps.js";
 
 
 export function makeTable(obj) {

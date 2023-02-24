@@ -1,4 +1,4 @@
-import { Decoder, Stream, Profile, Utils } from './modules/garmin-fit/index.js';
+import { Decoder, Stream, Profile, Utils } from './node_modules/@garmin-fit/sdk/src/index.js';
 
 export async function parseFit(fitFile) {
   //console.time('response in');
