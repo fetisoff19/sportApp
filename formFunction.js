@@ -52,10 +52,11 @@ export async function openEditForm(e) {
   if (document.querySelector('.editForm')) return
   let elem = e.target.parentElement.parentElement;
   let id = +elem.dataset.id
-  let h1 = document.querySelector('h1');
   let editForm = new FormComponent('editForm');
   let saveInput = new InputSubmit(otherWord.save, saveForm, id)
   let closeBtn = new ButtonComponent(otherWord.close, closeForm);
+  // заворачиваем editForm в div чтобы не было конфликта с td
+  let div = document.createElement('div');
 
   db.get('workouts', id).then((r) => {
     let name = new DivLabelInput('name')
@@ -69,12 +70,12 @@ export async function openEditForm(e) {
     let note = new DivLabelInput('note')
     note.setLabelText(filterKey.note);
     note.setTextArea({rows: 5, cols: 30, value: r.note}, 'note');
-    //заменить h1 на elem
-    editForm.addAfter(h1);
+    editForm.addAppend(div);
     editForm.setLabelText(otherWord.editTraining);
     editForm.addBtn(saveInput.input, closeBtn.btn);
     editForm.addElements(name.div, sport.div, note.div);
   })
+  elem.after(div)
 }
 
 export function saveForm(e, id){
@@ -109,7 +110,6 @@ export function closeForm(e) {
   let elem = e.target.parentNode.parentNode;
   elem.remove();
 }
-
 
 function changeInputTimeToSeconds (value) {
   return ((+value.slice(0, 2)*3600) + (+value.slice(3)*60));
