@@ -23,3 +23,9 @@ export async function sha256File(file) {
   const digest = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
   return digest;
 }
+
+export function garminLatLongToNormal(latLongArr) {
+  const divisor = 11930465;
+  const normalLatLong = [latLongArr[0]/divisor, latLongArr[1]/divisor];
+  return normalLatLong;
+}

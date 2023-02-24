@@ -1,11 +1,11 @@
 import * as L from './modules/leaflet/leaflet-src.esm.js';
+import { garminLatLongToNormal } from './utils.js';
 
 export function createMapWithWorkoutRoute(workoutData, appendTo) {
-  const garminCoorToNormal = (gl)=>gl/11930465;
   const polylinePoints = [];
   for (let rec of workoutData.recordMesgs) {
     if (!rec.hasOwnProperty('positionLat')) continue;
-    polylinePoints.push([garminCoorToNormal(rec.positionLat),garminCoorToNormal(rec.positionLong)]);
+    polylinePoints.push( garminLatLongToNormal([rec.positionLat, rec.positionLong]) );
   }
 
   if (polylinePoints.length===0) return;
@@ -24,6 +24,7 @@ export function createMapWithWorkoutRoute(workoutData, appendTo) {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
   }).addTo(map);
-      
-  L.polyline(polylinePoints).addTo(map);
+  
+  let polyline = L.polyline(polylinePoints).addTo(map);
+  map.fitBounds(polyline.getBounds());
 }
