@@ -1,6 +1,6 @@
 import {changeTextToDistance, DivLabelInput, InputSubmit} from "./components/inputComponent.js";
 import {filterKey, otherWord, sportType} from "./language.js";
-import {ButtonComponent} from "./components/buttonComponent.js";
+import {ButtonComponent, InputButtonComponent} from "./components/buttonComponent.js";
 import {formatDateForInput} from "./functionsDate.js";
 import {db} from "./db.js";
 import {FormComponent} from "./components/formComponent.js";
@@ -12,7 +12,7 @@ export function openCreateForm () {
   let manualForm = new FormComponent('createForm');
 
   let saveInput = new InputSubmit(otherWord.save, saveForm)
-  let closeBtn = new ButtonComponent(otherWord.close, closeForm)
+  let closeBtn = new InputButtonComponent(otherWord.close, closeForm)
 
   //в будущем, возможно, будем итерировать по массиву с названиями занятий
   let name = new DivLabelInput('name')

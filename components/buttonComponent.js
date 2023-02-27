@@ -16,3 +16,23 @@ export class ButtonComponent {
         elem.append(this.btn);
     }
 }
+
+export class InputButtonComponent {
+    //status (string) используем для изменения состояния кнопки
+    //elem - элемент для привязки кнопки
+    constructor(text, f, status, options) {
+        let btn = document.createElement('input');
+        btn.type = 'button';
+        btn.classList.add('button', text, status);
+        btn.value = text;
+        btn.addEventListener('click', (e) => f(e, options))
+
+        this.options = status;
+        this.btn = btn;
+        this.text = text;
+     }
+
+    addAppend(elem) {
+        elem.append(this.btn);
+    }
+}

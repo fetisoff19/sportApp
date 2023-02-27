@@ -29,3 +29,16 @@ export function garminLatLongToNormal(latLongArr) {
   const normalLatLong = [latLongArr[0]/divisor, latLongArr[1]/divisor];
   return normalLatLong;
 }
+
+export function htmlToNodeList(html) {
+  var template = document.createElement('template');
+  template.innerHTML = html;
+  return template.content.childNodes;
+}
+
+export async function htmlFileUrlToNodeList(url) {
+  let result = await fetch(url);
+  let html = await result.text();
+  let nodeList = htmlToNodeList(html);
+  return nodeList;
+}

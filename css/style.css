@@ -2,6 +2,7 @@
   --header-height: 1.6rem;
   --footer-height: 1.6rem;
   --app-color: #ff6200;
+  --app-border-radius: 3px;
 	--light-font: white;
   --light-grey-bg: rgb(240, 240, 240);
 }
@@ -10,11 +11,19 @@ body {
   margin: 0;
 }
 
+button { /* reset */
+  color: inherit;
+  font: inherit;
+  background-color: inherit;
+  border: unset;
+}
+
 html {font: 16px helvetica, arial, sans serif;}
 
 main {
   margin: 0 10% auto;
   min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  overflow-x: hidden;
 }
 
 .app-header {
@@ -35,6 +44,28 @@ main {
   font-weight: 600;
 }
 
+.app-nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  gap : 1rem;
+  flex-grow: 1;
+}
+
+.app-nav-item {
+  cursor: pointer;
+  padding: 0.15rem;
+  border-radius: var(--app-border-radius);
+}
+
+.app-nav-item:hover,
+.app-nav-item-selected,
+.app-nav-item:focus {
+  background-color: var(--light-grey-bg);
+  color: var(--app-color);
+}
+
 .app-footer {
 	display: flex;
   flex-flow: row nowrap;
@@ -47,6 +78,21 @@ main {
   padding-left: 10%;
 }
 
+.button {
+  background-color: var(--app-color);
+  color: var(--light-font);
+  padding: 0.3rem;
+  border-radius: var(--app-border-radius);
+}
+
+.button:hover,
+.button:focus {
+  filter: brightness(93%);
+}
+.button:active {
+  filter: brightness(97%);
+}
+
 
 h1 {
 	color: var(--app-color);
@@ -57,7 +103,7 @@ h1 {
 }
 
 table {
-    width: 1200px;
+  width: 1200px;
 	display: inline-block;
 }
 
