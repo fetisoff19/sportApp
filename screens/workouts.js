@@ -6,7 +6,7 @@ import {otherWord, setLanguage, } from "../language.js";
 import {openView} from "../viewTraining.js";
 import {openCreateForm, openEditForm} from "../formFunction.js";
 
-const oldStartScreenHtml = `
+const workoutsScreenHtml = `
   <label for="fit-to-json-file-inp">FIT TO JSON</label>
   <input type="file" id="fit-to-json-file-inp" accept=".fit">
   </br>
@@ -31,15 +31,15 @@ const oldStartScreenHtml = `
   </table>
 `;
 
-export const oldStartScreen = {
+export const workoutsScreen = {
   navName: "WORKOUTS",
   title: "WORKOUTS",
-  start: startOldStart,
+  start: workoutsStart,
   path: "?screen=workouts", //костыль чтобы работала перезагрузка страницы
-  html: oldStartScreenHtml
+  html: workoutsScreenHtml
 }
 
-function startOldStart() {
+function workoutsStart() {
   fillWorkoutsTable();
 
   let addManual = document.getElementById('addManual');

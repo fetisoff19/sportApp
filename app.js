@@ -3,11 +3,11 @@ import { htmlToNodeList, htmlFileUrlToNodeList } from './utils.js';
 import { otherWord, setLanguage, } from "./language.js";
 import { startScreen } from "./screens/start.js";
 
-import { oldStartScreen } from "./screens/oldStart.js";
+import { workoutsScreen } from "./screens/workouts.js";
 
 const appScreens = {
   startScreen,
-  oldStartScreen,
+  workoutsScreen,
 };
 
 const appTitle = 'sportsApp';
