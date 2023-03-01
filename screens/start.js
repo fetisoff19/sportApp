@@ -1,4 +1,4 @@
-import {addChart} from "../components/charts.js";
+import {addChartHeartRate} from "../components/charts.js";
 
 const page = `
 <h1>Добро пожаловать</h1>
@@ -11,6 +11,6 @@ export const startScreen = {
 }
 
 function startStartScreen() {
-  addChart(264)
+  addChartHeartRate(264)
 }
 

@@ -48,6 +48,9 @@ let otherWordRu = {
   view: 'Показать',
   delete: 'Удалить',
   log: 'Log',
+  hrm: 'уд./мин',
+  hr: 'Пульс',
+  km: 'км',
 }
 
 let sportTypeRu = {
