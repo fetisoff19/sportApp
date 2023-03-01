@@ -31,7 +31,7 @@ export function garminLatLongToNormal(latLongArr) {
 }
 
 export function htmlToNodeList(html) {
-  var template = document.createElement('template');
+  let template = document.createElement('template');
   template.innerHTML = html;
   return template.content.childNodes;
 }

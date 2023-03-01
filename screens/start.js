@@ -1,9 +1,16 @@
+import {addChart} from "../components/charts.js";
+
+const page = `
+<h1>Добро пожаловать</h1>
+<div id="container" style="width:100%; height:400px; margin:0 auto"></div>
+`
 export const startScreen = {
   start: startStartScreen,
   path: "/",
-  html: `<h1>Добро пожаловать</h1>`
+  html: page,
 }
 
-function startStartScreen(startOptions) {
-
+function startStartScreen() {
+  addChart(264)
 }
+

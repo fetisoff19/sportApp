@@ -2,7 +2,6 @@ import { setIndexedDbUsageInfo } from './db.js';
 import { htmlToNodeList, htmlFileUrlToNodeList } from './utils.js';
 import { otherWord, setLanguage, } from "./language.js";
 import { startScreen } from "./screens/start.js";
-
 import { workoutsScreen } from "./screens/workouts.js";
 
 const appScreens = {
@@ -18,7 +17,7 @@ const screenStartOptions = {container: document.querySelector('#appScreenContain
 {
   setLanguage('ru');
   // добавить применение польз. настроек
-  window.addEventListener('popstate', browserNavSwitchScreen);
+    window.addEventListener(' ', browserNavSwitchScreen);
   setAppNav();
   setIndexedDbUsageInfo();
   let currentPath = window.location.href.split('/')[3];
@@ -27,7 +26,7 @@ const screenStartOptions = {container: document.querySelector('#appScreenContain
     if (appScreens[screenName].path!==currentPath) continue;
     switchScreen(screenName, screenStartOptions);
     window.history.replaceState(screenName,'',appScreens[screenName].path);
-    break;
+    // break;
   }
 }
 //});

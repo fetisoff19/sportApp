@@ -18,6 +18,7 @@
   "homepage": "https://github.com/fetisoff19/sportApp#readme",
   "dependencies": {
     "@garmin-fit/sdk": "^21.107.0",
+    "highcharts": "^10.3.3",
     "idb": "^7.1.1",
     "leaflet": "^1.9.3"
   }
