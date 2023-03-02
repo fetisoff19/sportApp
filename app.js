@@ -3,10 +3,15 @@ import { htmlToNodeList, htmlFileUrlToNodeList } from './utils.js';
 import { otherWord, setLanguage, } from "./language.js";
 import { startScreen } from "./screens/start.js";
 import { workoutsScreen } from "./screens/workouts.js";
+import {highChartsScreen} from "./screens/highChartsScreen";
+import {chartsJsScreen, chartsJSScreen} from "./screens/chartsJSScreen";
+// Проверяется, активирован ли интерфейс горячей замены модулей
 
 const appScreens = {
   startScreen,
   workoutsScreen,
+  highChartsScreen,
+  chartsJsScreen
 };
 
 const appTitle = 'sportsApp';

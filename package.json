@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "webpack --mode development",
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -18,8 +19,14 @@
   "homepage": "https://github.com/fetisoff19/sportApp#readme",
   "dependencies": {
     "@garmin-fit/sdk": "^21.107.0",
+    "chart.js": "^4.2.1",
     "highcharts": "^10.3.3",
     "idb": "^7.1.1",
     "leaflet": "^1.9.3"
+  },
+  "devDependencies": {
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.11.1"
   }
 }

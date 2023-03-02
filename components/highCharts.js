@@ -8,9 +8,11 @@ export function addChartHeartRate(id) {
   let minHeartRate = 250;
   let maxHeartRate = 0;
   let avgHeartRate = 0;
+  let step = 0;
   db.get('workoutsData', +id).then(r => {
     let recordMesgs = r.recordMesgs;
     for (let message of recordMesgs) {
+      if(isNaN(message.heartRate) || isNaN(message.distance)) continue;
       distanceHeartRateArray.push([
         +(message.distance/1000).toFixed(2),
         message.heartRate,
@@ -18,10 +20,11 @@ export function addChartHeartRate(id) {
       minHeartRate = Math.min(minHeartRate, message.heartRate);
       maxHeartRate = Math.max(maxHeartRate, message.heartRate);
       avgHeartRate += message.heartRate;
+      step++;
     }
-    avgHeartRate = Math.round(avgHeartRate/recordMesgs.length);
+    avgHeartRate = Math.round(avgHeartRate/step);
   }).then(() => {
-    let chart = new Chart('container', {
+    new Chart('container', {
       title: {
         text: otherWord.hr,
       },
@@ -31,7 +34,7 @@ export function addChartHeartRate(id) {
       xAxis: {
         labels: {
           formatter: function () {
-            return this.value + 'km';
+            return this.value + otherWord.placeholderDistance;
           }
         },
         min: 0,
@@ -43,22 +46,18 @@ export function addChartHeartRate(id) {
         },
         min: minHeartRate,
         max: maxHeartRate,
-        // plotLines: [{
-        //   color: 'grey',
-        //   dashStyle: 'longdashdot',
-        //   value: 1avgHeartRate,
-        //   width: 2
-        // }]
+        // plotLines: [{ // mark the weekend
+        //   color: 'red',
+        //   width: 2,
+        //   value: 150,
+        // }],
       },
       series: [{
         data: distanceHeartRateArray,
-        color: '#ff0000',
+        color: 'red',
         lineWidth: 1,
-      },{
-        data: avgHeartRate,
-        color: '#ff0000',
-        lineWidth: 1,
-      }],
+      },
+      ],
       tooltip: {
         formatter: function() {
           return `${this.y} ${otherWord.hrm}<br/>${this.x.toString().replace('.', ',')} ${otherWord.km}`;
