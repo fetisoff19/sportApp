@@ -1,10 +1,6 @@
 import Highcharts from 'highcharts';
-// Alternatively, this is how to load Highstock. Highmaps and Highcharts Gantt are similar.
-// import Highcharts from 'highcharts/highstock';
-
-// Load the exporting module.
 import Exporting from 'highcharts/modules/exporting';
-// Initialize exporting module. (CommonJS only)
+
 Exporting(Highcharts);
 import {db} from "../db.js";
 import {otherWord} from "../language.js";
