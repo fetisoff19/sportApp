@@ -26,6 +26,7 @@ let filterKeyRu = {
   avgCadence: "Средний каденс",
   maxCadence: "Макс. каденс",
   avgRunningCadence: "Средний каденс",
+  avgPower: "Средняя мощность",
   name: "Название занятия",
   dateAdded: "Занятие загружено",
   note: "Описание",
@@ -48,9 +49,17 @@ let otherWordRu = {
   view: 'Показать',
   delete: 'Удалить',
   log: 'Log',
-  hrm: 'уд./мин',
+  bpm: 'уд./мин',
   hr: 'Пульс',
+  speed: 'Скорость',
+  kmph: 'км/ч',
+  cadence: 'Каденс',
+  rpm: 'об/мин',
   km: 'км',
+  power: 'Мощность',
+  altitude: 'Высота',
+  w: 'Вт',
+  m: 'м',
 }
 
 let sportTypeRu = {
@@ -58,10 +67,12 @@ let sportTypeRu = {
   running: 'Бег'
 }
 
-export function setLanguage(lang) {
+function setLanguage(lang) {
   if (lang.toLowerCase() === 'ru') {
     filterKey = filterKeyRu;
     otherWord = otherWordRu;
     sportType = sportTypeRu;
   }
 }
+
+setLanguage('ru') // запускаем здесь, иначе у графиков не будет подписей

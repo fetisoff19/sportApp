@@ -1,6 +1,5 @@
 import { setIndexedDbUsageInfo } from './db.js';
 import { htmlToNodeList, htmlFileUrlToNodeList } from './utils.js';
-import { otherWord, setLanguage, } from "./language.js";
 import { startScreen } from "./screens/start.js";
 import { workoutsScreen } from "./screens/workouts.js";
 import {highChartsScreen} from "./screens/highChartsScreen";
@@ -18,7 +17,6 @@ const screenStartOptions = {container: document.querySelector('#appScreenContain
 
 //window.addEventListener('DOMContentLoaded', ()=> { //не работает из-за кода, вставленного live server
 {
-  setLanguage('ru');
   // добавить применение польз. настроек
     window.addEventListener(' ', browserNavSwitchScreen);
   setAppNav();
