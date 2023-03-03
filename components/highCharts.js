@@ -1,5 +1,11 @@
-import Chart from '../node_modules/highcharts/es-modules/Core/Chart/Chart.js';
-import LineSeries from '../node_modules/highcharts/es-modules/Series/Line/LineSeries.js';
+import Highcharts from 'highcharts';
+// Alternatively, this is how to load Highstock. Highmaps and Highcharts Gantt are similar.
+// import Highcharts from 'highcharts/highstock';
+
+// Load the exporting module.
+import Exporting from 'highcharts/modules/exporting';
+// Initialize exporting module. (CommonJS only)
+Exporting(Highcharts);
 import {db} from "../db.js";
 import {otherWord} from "../language.js";
 
@@ -24,7 +30,7 @@ export function addChartHeartRate(id) {
     }
     avgHeartRate = Math.round(avgHeartRate/step);
   }).then(() => {
-    new Chart('container', {
+    Highcharts.chart('container', {
       title: {
         text: otherWord.hr,
       },
@@ -46,11 +52,11 @@ export function addChartHeartRate(id) {
         },
         min: minHeartRate,
         max: maxHeartRate,
-        // plotLines: [{ // mark the weekend
-        //   color: 'red',
-        //   width: 2,
-        //   value: 150,
-        // }],
+        plotLines: [{ // mark the weekend
+          color: 'black',
+          width: 2,
+          value: avgHeartRate,
+        }],
       },
       series: [{
         data: distanceHeartRateArray,

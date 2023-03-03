@@ -21,7 +21,7 @@ export function addChartHeartRate(id) {
       step++;
     }
     avgHeartRate = Math.round(avgHeartRate/step);
-  }).then(() => {
+      }).then(() => {
     (async function() {
       new Chart(
         document.getElementById('container'),
