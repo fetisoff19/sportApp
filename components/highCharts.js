@@ -5,6 +5,7 @@ import Exporting from 'highcharts/modules/exporting';
 Exporting(Highcharts);
 
 let distanceMax = 0;
+
 let configSpeed = {
   title: otherWord.speed,
   plotLinesText: filterKey.avgSpeed,
@@ -64,14 +65,16 @@ export function addCharts(id) {
   let altitudeMax = 0;
   let altitudeAvg = 0;
 
-
   let step = 0;
 
   db.get('workoutsData', +id).then(r => {
     let recordMesgs = r.recordMesgs;
     for (let message of recordMesgs) {
-      {
-        if (isNaN(message.speed) || isNaN(message.distance)) continue;
+      if (isNaN(message.heartRate) && isNaN(message.speed) && isNaN(message.distance) && isNaN(message.power) && isNaN(message.altitude)) return;
+      if (isNaN(message.distance)) continue;
+     step++;
+
+      {if (isNaN(message.speed)) message.speed = 0
         speedDistanceArray.push(
           [(+(message.distance / 1000).toFixed(2)), +(message.speed * 3.6).toFixed(1)])
         speedMin = Math.min(speedMin, message.speed * 3.6);
@@ -79,72 +82,71 @@ export function addCharts(id) {
         speedAvg += (message.speed * 3.6);
       }
 
-      {
-        if (isNaN(message.power) || isNaN(message.distance)) continue;
+      {if (isNaN(message.power)) message.power = 0
         powerDistanceArray.push(
           [(+(message.distance / 1000).toFixed(2)), message.power])
         powerMin = Math.min(powerMin, message.power);
         powerMax = Math.max(powerMax, message.power);
-        powerAvg += (message.power);
+        if (message.power === 0) {
+          message.power = powerAvg/step
+        } else powerAvg += message.power;
       }
 
       {
-        if (isNaN(message.heartRate) || isNaN(message.distance)) continue;
+        if (isNaN(message.heartRate)) message.heartRate = 0;
         heartRateDistanceArray.push(
           [(+(message.distance / 1000).toFixed(2)), message.heartRate])
         heartRateMin = Math.min(heartRateMin, message.heartRate);
         heartRateMax = Math.max(heartRateMax, message.heartRate);
-        heartRateAvg += message.heartRate;
+        if (message.heartRate === 0) {
+          message.heartRate = heartRateAvg/step
+        } else heartRateAvg += message.heartRate;
       }
 
-      {
-        if (isNaN(message.cadence) || isNaN(message.distance)) continue;
+      { if (isNaN(message.cadence)) message.cadence = 0
         cadenceDistanceArray.push(
           [(+(message.distance / 1000).toFixed(2)), message.cadence])
         cadenceMin = Math.min(cadenceMin, message.cadence);
         cadenceMax = Math.max(cadenceMax, message.cadence);
-        cadenceAvg += message.cadence;
+        if (message.cadence === 0) {
+          message.cadence = cadenceAvg/step
+        } else cadenceAvg += message.cadence;
       }
 
-      {
-        if (isNaN(message.altitude) || isNaN(message.distance) ) continue;
-        if(message.altitude > altitudeAvg/step*5) {message.altitude = altitudeAvg/step}; // времянка
+      { if (isNaN(message.altitude)) message.altitude = 0
+        if(message.altitude > 6000) {message.altitude = altitudeAvg/step}; // времянка
         altitudeDistanceArray.push(
           [(+(message.distance / 1000).toFixed(2)), message.altitude])
         altitudeMin = Math.min(altitudeMin, message.altitude);
         altitudeMax = Math.max(altitudeMax, message.altitude);
         altitudeAvg += message.altitude;
       }
-      step++;
     }
 
     if (step < 1) {
       console.log(step)
       return
     };
+
     heartRateAvg = Math.round(heartRateAvg/step);
     speedAvg = +(speedAvg/step).toFixed(1);
     powerAvg = Math.round(powerAvg/step);
     cadenceAvg = Math.round(cadenceAvg/step);
     altitudeAvg = Math.round(altitudeAvg/step);
-    distanceMax = speedDistanceArray[step - 1][0];
-
+    distanceMax = +(r.recordMesgs[r.recordMesgs.length - 1].distance / 1000).toFixed(2);
   }).then(() => {
-    if (speedDistanceArray.length > step/2)
       addChartByValue('speed', configSpeed, speedMin, speedMax, speedAvg, speedDistanceArray);
-    if (powerDistanceArray.length > step/2)
       addChartByValue('power', configPower, powerMin, powerMax, powerAvg, powerDistanceArray);
-    if (heartRateDistanceArray.length > step/2)
       addChartByValue('hr',  configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray);
-    if (cadenceDistanceArray.length > step/2)
       addChartByValue('cadence', configCadence, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
-    if (altitudeDistanceArray.length > step/2)
       addChartByValue('altitude', configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray);
+      // console.log(heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray)
   })
 }
 
-
 function addChartByValue (id, config, valueMin, valueMax, valueAvg, data) {
+  if (valueAvg === 0) return;
+  // console.log(valueMin, valueMax, valueAvg, data)
   {
     Highcharts.chart(id, {
       chart: {
@@ -173,16 +175,20 @@ function addChartByValue (id, config, valueMin, valueMax, valueAvg, data) {
         min: valueMin,
         max: valueMax,
         plotLines: [{ // mark the weekend
-          color: 'grey',
-          width: 2,
+          color: '#383838',
+          width: 1,
           value: valueAvg,
-          dashStyle: 'dash',
+          dashStyle: 'shortdash',
           label: {
             text: `${config.plotLinesText}<br/>${valueAvg.toString().replace('.', ',')} ${config.plotLinesTextValue}`,
             // `${filterKey.avgHeartRate}` + ': ' + `${otherWord.hrm}`, // Content of the label.
             align: 'right', // Positioning of the label.
             x: - 20,
-            y: 30,
+            y: 20,
+            style:{
+              fontWeight: 'bold',
+              color: '#383838',
+            }
           },
           zIndex: 5
         }],
@@ -197,10 +203,10 @@ function addChartByValue (id, config, valueMin, valueMax, valueAvg, data) {
         areaspline: {
           fillOpacity: 1,
         },
-        series: [{
-          // specific options for this series instance
-          type: 'areaspline'
-        }]
+        // series: [{
+        //   // specific options for this series instance
+        //   type: 'areaspline'
+        // }],
       },
       tooltip: {
         formatter: function() {

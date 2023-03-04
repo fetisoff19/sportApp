@@ -1,16 +1,15 @@
 import {addCharts} from "../components/highCharts.js";
 import {otherWord} from "../language.js";
+import {db} from "../db";
 
 const page = `
 <h2>ГРАФИКИ!!!1</h2>
-<div id="speed" style="width:100%; height:400px; margin:0 auto"></div>
-<div id="power" style="width:100%; height:400px; margin:0 auto"></div>
-<div id="hr" style="width:100%; height:400px; margin:0 auto"></div>
-<div id="cadence" style="width:100%; height:400px; margin:0 auto"></div>
-<div id="altitude" style="width:100%; height:400px; margin:0 auto"></div>
+<div id="speed" style="margin:0 auto"></div>
+<div id="power" style="margin:0 auto"></div>
+<div id="hr" style="margin:0 auto"></div>
+<div id="cadence" style="margin:0 auto"></div>
+<div id="altitude" style="margin:0 auto"></div>
 `
-
-
 
 export const highChartsScreen = {
   navName: "HIGHCHARTS",
@@ -21,6 +20,7 @@ export const highChartsScreen = {
 }
 
 function startHighChartsScreen() {
-  addCharts(264)
+// добавить проверку на флаг isManual в workout
+  addCharts(269)
 }
 
