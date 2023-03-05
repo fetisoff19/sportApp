@@ -15,12 +15,12 @@ export const highChartsScreen = {
   navName: "HIGHCHARTS",
   title: "HIGHCHARTS",
   start: startHighChartsScreen,
-  path: "?screen=highcharts.js",
+  path: "?screen=highchartsjs",
   html: page,
 }
 
-function startHighChartsScreen() {
-// добавить проверку на флаг isManual в workout
-  addCharts(269)
+function startHighChartsScreen(startOptions) {
+  // добавить проверку на флаг isManual в workout
+  addCharts(startOptions.workoutsId || 269);
 }
 

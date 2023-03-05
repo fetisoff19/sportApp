@@ -39,8 +39,8 @@ export const workoutsScreen = {
   html: workoutsScreenHtml
 }
 
-function workoutsStart() {
-  fillWorkoutsTable();
+function workoutsStart(startOptions) {
+  fillWorkoutsTable(startOptions);
 
   let addManual = document.getElementById('addManual');
   let createBtn = new ButtonComponent(otherWord.add, openCreateForm);
@@ -71,12 +71,12 @@ function workoutsStart() {
     });
 }
 
-async function fillWorkoutsTable() {
+async function fillWorkoutsTable(startOptions) {
   let workouts = await db.getAll('workouts');
-  workouts.forEach(rec=> addRowToWorkoutsTable(rec));
+  workouts.forEach(rec=> addRowToWorkoutsTable(rec, startOptions));
 }
 
-function addRowToWorkoutsTable(rec) {
+function addRowToWorkoutsTable(rec, startOptions) {
   let tr = document.createElement('tr');
   tr.dataset.id = rec.id;
   let tdId = document.createElement('td');
@@ -86,6 +86,7 @@ function addRowToWorkoutsTable(rec) {
   let tdDateAdded = document.createElement('td');
   let tdNote = document.createElement('td');
   let tdView = document.createElement('td');
+  let thHc = document.createElement('td');
   let tdEdit = document.createElement('td');
   let tdLog = document.createElement('td');
   let tdDel = document.createElement('td');
@@ -93,6 +94,8 @@ function addRowToWorkoutsTable(rec) {
   // объявление кнопок
   let viewBtn = new ButtonComponent(otherWord.view, openView, true);
   viewBtn.addAppend(tdView);
+  let openHcBtn = new ButtonComponent('HC', openHighcharts);
+  openHcBtn.addAppend(thHc);
   let editBtn = new ButtonComponent(otherWord.edit,  openEditForm, true, rec.id);
   editBtn.addAppend(tdEdit);
   let logBtn = new ButtonComponent(otherWord.log, log);
@@ -111,7 +114,7 @@ function addRowToWorkoutsTable(rec) {
   //добавление элементов в DOM
   document.querySelector('#workoutsTable').append(tr);
   tr.append(tdId, tdName, tdType, tdTimeCreated,
-    tdDateAdded, tdNote, tdEdit, tdView, tdLog, tdDel);
+    tdDateAdded, tdNote, tdEdit, tdView, thHc, tdLog, tdDel);
 }
 
 //функции, которые пока что некуда по смыслу распределить
@@ -139,6 +142,16 @@ function del(e) {
           document.getElementById(`${id}`).remove()
       }
   });
+}
+
+function openHighcharts(e) {
+  let hcOptions = {
+    ...startOptions,
+    ...{
+      workoutsId: e.target.parentElement.parentElement.dataset.id
+    }
+  }
+  startOptions.switchToScreen('highChartsScreen', hcOptions);
 }
 
 async function saveJsonFileFromFit(file) {

@@ -13,12 +13,12 @@ const appScreens = {
 
 const appTitle = 'sportsApp';
 
-const screenStartOptions = {container: document.querySelector('#appScreenContainer')};
+const screenStartOptions = {container: document.querySelector('#appScreenContainer'), switchToScreen};
 
 //window.addEventListener('DOMContentLoaded', ()=> { //не работает из-за кода, вставленного live server
 {
   // добавить применение польз. настроек
-    window.addEventListener(' ', browserNavSwitchScreen);
+  window.addEventListener('popstate', browserNavSwitchScreen);
   setAppNav();
   setIndexedDbUsageInfo();
   let currentPath = window.location.href.split('/')[3];
@@ -72,6 +72,11 @@ async function addHtmlToScreen(screen, container) {
 function browserNavSwitchScreen() {
   let curScrName = window.history.state;
   switchScreen(curScrName, screenStartOptions);
+}
+
+function switchToScreen(screenName, options) {
+  switchScreen(screenName, options);
+  window.history.pushState(screenName, '', appScreens[screenName].path);
 }
 
 function appNavSwitchScreen() {
