@@ -79,6 +79,7 @@ main {
 }
 
 .button {
+  cursor: pointer;
   background-color: var(--app-color);
   color: var(--light-font);
   padding: 0.3rem;

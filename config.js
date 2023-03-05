@@ -1,0 +1,153 @@
+let fields = {
+  timestamp: {
+    type: 'object',
+    input: 'datetime-local',
+  },
+  startTime: {
+    type: 'object',
+    input: 'datetime-local',
+    required: true,
+  },
+  totalElapsedTime: {
+    type: 'number',
+    input: 'duration',
+    required: true,
+    units: 's',
+  },
+  totalTimerTime: {
+    type: 'number',
+    input: 'duration',
+    units: 's',
+  },
+  totalDistance: {
+    type: 'number',
+    input: 'number',
+    min: 0,
+    units: 'm',
+  },
+  totalStrides: {
+    type: 'number',
+    input: 'number',
+    min: 0,
+  },
+  totalCalories: {
+    type: 'number',
+    input: 'number',
+    min: 0,
+  },
+  avgSpeed: {
+    type: 'number',
+    input: 'number',
+    units: 'mps',
+    min: 0,
+  },
+  maxSpeed: {
+    type: 'number',
+    input: 'number',
+    units: 'mps',
+    min: 0,
+  },
+  minAltitude: {
+    type: 'number',
+    input: 'number',
+    units: 'm',
+  },
+  avgAltitude: {
+    type: 'number',
+    input: 'number',
+    units: 'm',
+  },
+  maxAltitude: {
+    type: 'number',
+    input: 'number',
+    units: 'm',
+  },
+  avgGrade: {
+    type: 'number',
+    input: 'number',
+    units: '%',
+  },
+  maxPosGrade: {
+    type: 'number',
+    input: 'number',
+    units: '%',
+  },
+  totalAscent: {
+    type: 'number',
+    input: 'number',
+    units: 'm',
+  },
+  totalDescent: {
+    type: 'number',
+    input: 'number',
+    units: 'm',
+  },
+  sport: {
+    type: 'string',
+    input: 'select',
+    selectOptions: ['cycling','running'],
+  },
+  // avgHeartRate: "Средний пульс",
+  // minHeartRate: "Мин. пульс",
+  // maxHeartRate: "Макс. пульс",
+  // avgCadence: "Средний каденс",
+  // maxCadence: "Макс. каденс",
+  // avgRunningCadence: "Средний каденс",
+  // avgPower: "Средняя мощность",
+  // name: "Название занятия",
+  // dateAdded: "Занятие загружено",
+  // note: "Описание",
+  // id: "id",
+  // dateEdit: "Занятие изменено",
+  // manual: "Добавлено вручную?",
+  // editDate:'',
+};
+
+const dict = {
+  fields: {
+    timestamp: {ru: 'Окончание занятия', en: 'Workout end'},
+    startTime: {ru: 'Дата', en:'Date'},
+    totalElapsedTime: {ru: 'Продолжительность', en: 'Duration'},
+    totalTimerTime: {ru: 'Время в движении', en: 'Moving time'},
+    totalDistance: {ru: 'Дистанция', en: 'Distance'},
+    totalStrides: {ru: 'Кол-во шагов', en: 'Strides'},
+    totalCalories: {ru: 'Калории', en: 'Calories'},
+    avgSpeed: {ru: 'Средняя скорость', en: 'Average speed'},
+    maxSpeed: {ru: 'Макс. скорость', en: 'Maximum speed'},
+    minAltitude: {ru: 'Мин. высота', en: 'Minimum altitude'},
+    avgAltitude: {ru: 'Средняя высота', en: 'Average altitude'},
+    maxAltitude: {ru: 'Макс. высота', en: 'Maximum altitude'},
+    avgGrade: {ru: 'Средний градиент', en: 'Average grade'},
+    maxPosGrade: {ru: 'Макс. градиент', en: 'Maximum grade'},
+    totalAscent: {ru: 'Набор', en: 'Ascend'},
+    totalDescent: {ru: 'Спуск', en: 'Descend'},
+    sport: {ru: 'Вид занятия', en: 'Sport'},
+
+  },
+  units: {
+    s: {ru: 'Секунды', en: 'Seconds'},
+    m: {ru: 'Метры', en: 'Meters'},
+    mps: {ru: 'Метры в секунду', en: 'Meters per second'},
+    bpm: {ru: 'уд./мин', en: 'Beats per minute'},
+
+  },
+  sports: {
+    cycling: {ru: 'Велоспорт', en: 'Cycling'},
+    running: {ru: 'Бег', en: 'Running'},
+  },
+  ui: {
+    createTraining: {ru: 'Создание тренировки'},
+    editTraining: {ru: 'Изменение тренировки'},
+    placeholderText: {ru: 'Необходимо заполнить'},
+    placeholderTime: {ru: 'чч:мм'},
+    placeholderDistance: {ru: 'км'},
+    placeholderNote: {ru: 'О тренировке'},
+    close: {ru: 'Закрыть'},
+    save: {ru: 'Сохранить'},
+    edit: {ru: 'Изменить'},
+    add: {ru: 'Добавить'},
+    view: {ru: 'Показать'},
+    delete: {ru: 'Удалить'},
+
+  },
+};

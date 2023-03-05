@@ -94,7 +94,7 @@ function addRowToWorkoutsTable(rec, startOptions) {
   // объявление кнопок
   let viewBtn = new ButtonComponent(otherWord.view, openView, true);
   viewBtn.addAppend(tdView);
-  let openHcBtn = new ButtonComponent('HC', openHighcharts);
+  let openHcBtn = new ButtonComponent('HC', (e)=>openHighcharts(e, startOptions));
   openHcBtn.addAppend(thHc);
   let editBtn = new ButtonComponent(otherWord.edit,  openEditForm, true, rec.id);
   editBtn.addAppend(tdEdit);
@@ -144,13 +144,13 @@ function del(e) {
   });
 }
 
-function openHighcharts(e) {
+function openHighcharts(e, startOptions) {
   let hcOptions = {
     ...startOptions,
     ...{
       workoutsId: e.target.parentElement.parentElement.dataset.id
     }
-  }
+  };
   startOptions.switchToScreen('highChartsScreen', hcOptions);
 }
 
