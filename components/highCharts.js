@@ -4,6 +4,7 @@ import Highcharts from 'highcharts';
 import Exporting from 'highcharts/modules/exporting';
 import {dict, userLang} from "../config";
 import {training} from "../screens/highChartsScreen";
+import {getMinSec} from "../functionsDate";
 Exporting(Highcharts);
 
 let distanceMax = 0;
@@ -23,6 +24,7 @@ let configPace = {
   plotLinesText: dict.fields.avgPace[userLang],
   plotLinesTextValue: dict.units.pace[userLang],
   colorLine: 'blue',
+  type: 'pace',
 }
 let configPower = {
   id: 'power',
@@ -75,8 +77,6 @@ export function addCharts(training, workoutData) {
   let powerMax = 0;
   let powerAvg = 0;
 
-  // let timestampArray = [];
-
   let heartRateDistanceArray = []
   let heartRateMin = 250;
   let heartRateMax = 0;
@@ -95,11 +95,10 @@ export function addCharts(training, workoutData) {
   let step = 0;
 
   let paceDistanceArray = []
-  let paceMin = 10^10;
-  let paceMax = 0;
+  let paceMin = 100;
+  let paceMax = 1;
   let pace = 0;
   let paceAvg = 0;
-
 
   let recordMesgs = workoutData.recordMesgs;
   if (isNaN(recordMesgs[recordMesgs.length - 1].heartRate)
@@ -127,7 +126,7 @@ export function addCharts(training, workoutData) {
       // if (stepDistance === 0) pace = paceAvg/step;
       pace = +(stepTime / (stepDistance * 60 * 1000)).toFixed(2); // получаем км/мин
       paceDistanceArray.push([distance, pace]);
-      // paceMin = Math.min(paceMin, pace);
+      paceMin = Math.min(paceMin, pace);
       // paceMax = Math.max(paceMax, pace);
       // paceAvg += Math.round(pace);
       // console.log(paceAvg);
@@ -181,7 +180,7 @@ export function addCharts(training, workoutData) {
     return
   };
 
-  heartRateAvg = heartRateAvg/step;
+  heartRateAvg = Math.round(heartRateAvg/step);
   speedAvg = +(speedAvg/step).toFixed(1);
   powerAvg = Math.round(powerAvg/step);
   cadenceAvg = Math.round(cadenceAvg/step);
@@ -189,14 +188,15 @@ export function addCharts(training, workoutData) {
   distanceMax = +(recordMesgs[recordMesgs.length - 1].distance / 1000).toFixed(2);
   let timeTraining = +(recordMesgs[recordMesgs.length - 1].timestamp - timestampStart) / 60000;
   paceAvg = +(timeTraining / distanceMax).toFixed(2);
-  console.log(paceAvg, paceDistanceArray, timeTraining, distanceMax);
+  paceMax = paceAvg * 1.3;
+  // console.log(paceAvg, paceMin, paceMax, timeTraining, distanceMax);
   // console.log(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray)
 
   addChartByValue(configPower, powerMin, powerMax, powerAvg, powerDistanceArray);
   addChartByValue(configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray);
   addChartByValue(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray);
   if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "running") {
-    addChartByValue(configPace, 3, paceAvg*1.5, paceAvg, paceDistanceArray);
+    addChartByValue(configPace, paceMin, paceMax, paceAvg, paceDistanceArray);
     addChartByValue(configCadenceRun, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
   }
   else {
@@ -207,8 +207,10 @@ export function addCharts(training, workoutData) {
 
 function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
   if (valueAvg === 0) return;
+  let avgText = '';
   // console.log(valueMin, valueMax, valueAvg, data)
-  {
+  { if (config.type) avgText = getMinSec(valueAvg);
+    else avgText = valueAvg.toString().replace('.', ',')
     Highcharts.chart(config.id, {
       chart: {
         type: 'areaspline'
@@ -241,8 +243,7 @@ function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
           value: valueAvg,
           dashStyle: 'shortdash',
           label: {
-            text: `${config.plotLinesText}<br/>${valueAvg.toString().replace('.', ',')} ${config.plotLinesTextValue}`,
-            // `${filterKey.avgHeartRate}` + ': ' + `${otherWord.hrm}`, // Content of the label.
+            text: `${config.plotLinesText}<br/>${avgText} ${config.plotLinesTextValue}`, // `${filterKey.avgHeartRate}` + ': ' + `${otherWord.hrm}`, // Content of the label.
             align: 'right', // Positioning of the label.
             x: - 20,
             y: 20,
@@ -270,7 +271,9 @@ function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
         // }],
       },
       tooltip: {
-        formatter: function() {
+        formatter:
+          function() {
+          if(config.type) this.y = getMinSec(this.y);
           return `${this.y.toString().replace('.', ',')} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${dict.units.km[userLang]}`;
         },
         outside: true,

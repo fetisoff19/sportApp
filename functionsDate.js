@@ -10,7 +10,6 @@ function formatDateTimeForInput(dateObj) {
         .split("Z")[0];
 }
 
-
 function getDateOfISOWeek(yearAndWeek) {
     //получает номер и год (2020-W06), возвращает дату начала недели
     let w = yearAndWeek.substring(6,8);
@@ -69,7 +68,6 @@ function getFirstDayOfPeriod(date, period) {
     return FD;
 }
 
-
 function getWeekNum(date) {
     let d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
     let dayNum = d.getUTCDay() || 7;
@@ -77,3 +75,12 @@ function getWeekNum(date) {
     let yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
     return Math.ceil((((d - yearStart) / 86400000) + 1)/7);
 }
+
+export function getMinSec(minuts) {
+    let min = Math.floor(minuts);
+    let sec = Math.round((minuts - min) * 60);
+    if (sec === 0) sec = '00';
+    if (sec < 10) sec = '0' + sec;
+    return min + ':' + sec
+}
+
