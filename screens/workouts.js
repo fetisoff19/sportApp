@@ -5,6 +5,10 @@ import {ButtonComponent} from "../components/buttonComponent.js";
 import {otherWord, setLanguage, } from "../language.js";
 import {openView} from "../viewTraining.js";
 import {openCreateForm, openEditForm} from "../formFunction.js";
+import {training} from './highChartsScreen'
+import {dict as dist, userLang} from "../config";
+
+let workouts = {}; // вынесено в отдельный файл
 
 const workoutsScreenHtml = `
   <label for="fit-to-json-file-inp">FIT TO JSON</label>
@@ -15,7 +19,7 @@ const workoutsScreenHtml = `
   </br>
   <label id="addManual">CREATE MANUAL </label>
   </br>
-  <h1>WORKOUTS</h1>
+  <h1></h1>
   <table id="workoutsTable">
     <tr>
         <td class="id">Id</td>
@@ -32,8 +36,8 @@ const workoutsScreenHtml = `
 `;
 
 export const workoutsScreen = {
-  navName: "WORKOUTS",
-  title: "WORKOUTS",
+  navName: dist.title.trainings[userLang],
+  title: dist.title.trainings[userLang],
   start: workoutsStart,
   path: "?screen=workouts", //костыль чтобы работала перезагрузка страницы
   html: workoutsScreenHtml
@@ -42,6 +46,7 @@ export const workoutsScreen = {
 function workoutsStart(startOptions) {
   fillWorkoutsTable(startOptions);
 
+  document.querySelector('h1').innerHTML = dist.title.trainings[userLang];
   let addManual = document.getElementById('addManual');
   let createBtn = new ButtonComponent(otherWord.add, openCreateForm);
   createBtn.addAppend(addManual);
@@ -72,7 +77,7 @@ function workoutsStart(startOptions) {
 }
 
 async function fillWorkoutsTable(startOptions) {
-  let workouts = await db.getAll('workouts');
+  workouts = await db.getAll('workouts');
   workouts.forEach(rec=> addRowToWorkoutsTable(rec, startOptions));
 }
 
@@ -148,10 +153,16 @@ function openHighcharts(e, startOptions) {
   let hcOptions = {
     ...startOptions,
     ...{
-      workoutsId: e.target.parentElement.parentElement.dataset.id
+      workoutsId: +e.target.parentElement.parentElement.dataset.id
     }
   };
   startOptions.switchToScreen('highChartsScreen', hcOptions);
+  for (let workout of workouts) {
+    if (workout.id === hcOptions.workoutsId) {
+       Object.assign(training, workout)  // сохраняем и передаём данные тренировку в экран highChartsScreen
+    }
+  }
+
 }
 
 async function saveJsonFileFromFit(file) {

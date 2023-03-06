@@ -1,7 +1,7 @@
 import * as L from '../node_modules/leaflet/dist/leaflet-src.esm.js';
 import { garminLatLongToNormal } from '../utils.js';
 
-export function createMapWithWorkoutRoute(workoutData, appendTo) {
+export function createMapWithWorkoutRoute(workoutData, appendTo, height, width) {
   const polylinePoints = [];
   for (let rec of workoutData.recordMesgs) {
     if (!rec.hasOwnProperty('positionLat')) continue;
@@ -15,7 +15,9 @@ export function createMapWithWorkoutRoute(workoutData, appendTo) {
 
   let mapElement = document.createElement('div');
   mapElement.id=`map-${workoutData.id_workouts}`;
-  mapElement.style.height = '180px';
+  if (height) mapElement.style.height = height + 'px';
+  else mapElement.style.height = '180px';
+  if (width) mapElement.style.width = width + 'px';
   // mapElement.style.width = '800px';
   appendTo.appendChild(mapElement);
   let map = L.map(mapElement.id).setView(startCoordinates, startZoom);

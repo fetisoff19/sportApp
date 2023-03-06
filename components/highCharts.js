@@ -2,42 +2,69 @@ import {db} from "../db.js";
 import {filterKey, otherWord} from "../language.js";
 import Highcharts from 'highcharts';
 import Exporting from 'highcharts/modules/exporting';
+import {dict, userLang} from "../config";
+import {training} from "../screens/highChartsScreen";
 Exporting(Highcharts);
 
 let distanceMax = 0;
+let timestampStart = {};
 
 let configSpeed = {
-  title: otherWord.speed,
-  plotLinesText: filterKey.avgSpeed,
-  plotLinesTextValue: otherWord.kmph,
+  id: 'speed',
+  title: dict.fields.speed[userLang],
+  plotLinesText: dict.fields.avgSpeed[userLang],
+  plotLinesTextValue: dict.units.kmph[userLang],
+  colorLine: 'blue',
+}
+
+let configPace = {
+  id: 'pace',
+  title: dict.fields.pace[userLang],
+  plotLinesText: dict.fields.avgPace[userLang],
+  plotLinesTextValue: dict.units.pace[userLang],
   colorLine: 'blue',
 }
 let configPower = {
-  title: otherWord.power,
-  plotLinesText: filterKey.avgPower,
-  plotLinesTextValue: otherWord.w,
+  id: 'power',
+  title: dict.fields.power[userLang],
+  plotLinesText: dict.fields.avgPower[userLang],
+  plotLinesTextValue: dict.units.w[userLang],
   colorLine: '#ff6200',
 }
 let configHeartRate = {
-  title: otherWord.hr,
-  plotLinesText: filterKey.avgHeartRate,
-  plotLinesTextValue: otherWord.bpm,
+  id: 'hr',
+  title: dict.fields.hr[userLang],
+  plotLinesText: dict.fields.avgHR[userLang],
+  plotLinesTextValue: dict.units.bpm[userLang],
   colorLine: 'red',
 }
-let configCadence = {
-  title: otherWord.cadence,
-  plotLinesText: filterKey.avgCadence,
-  plotLinesTextValue: otherWord.rpm,
+let configCadenceCycl = {
+  id: 'cadenceCycl',
+  title: dict.fields.cadence[userLang],
+  plotLinesText: dict.fields.avgCadence[userLang],
+  plotLinesTextValue: dict.units.cadenceCycl[userLang],
+  colorLine: 'violet',
+}
+
+let configCadenceRun = {
+  id: 'cadenceRun',
+  title: dict.fields.cadence[userLang],
+  plotLinesText: dict.fields.avgCadence[userLang],
+  plotLinesTextValue: dict.units.cadenceRun[userLang],
   colorLine: 'violet',
 }
 let configAltitude = {
-  title: otherWord.altitude,
-  plotLinesText: filterKey.avgAltitude,
-  plotLinesTextValue: otherWord.m,
+  id: 'altitude',
+  title: dict.fields.altitude[userLang],
+  plotLinesText: dict.fields.avgAltitude[userLang],
+  plotLinesTextValue: dict.units.m[userLang],
   colorLine: 'green',
 }
 
-export function addCharts(id) {
+
+export function addCharts(training, workoutData) {
+  if (training.isManual || !workoutData) return;
+
   let speedDistanceArray = [];
   let speedMin = 200;
   let speedMax = 0;
@@ -67,88 +94,122 @@ export function addCharts(id) {
 
   let step = 0;
 
-  db.get('workoutsData', +id).then(r => {
-    let recordMesgs = r.recordMesgs;
-    for (let message of recordMesgs) {
-      if (isNaN(message.heartRate) && isNaN(message.speed) && isNaN(message.distance) && isNaN(message.power) && isNaN(message.altitude)) return;
-      if (isNaN(message.distance)) continue;
-     step++;
+  let paceDistanceArray = []
+  let paceMin = 10^10;
+  let paceMax = 0;
+  let pace = 0;
+  let paceAvg = 0;
 
-      {if (isNaN(message.speed)) message.speed = 0
-        speedDistanceArray.push(
-          [(+(message.distance / 1000).toFixed(2)), +(message.speed * 3.6).toFixed(1)])
-        speedMin = Math.min(speedMin, message.speed * 3.6);
-        speedMax = Math.max(speedMax, message.speed * 3.6);
-        speedAvg += (message.speed * 3.6);
-      }
 
-      {if (isNaN(message.power)) message.power = 0
-        powerDistanceArray.push(
-          [(+(message.distance / 1000).toFixed(2)), message.power])
-        powerMin = Math.min(powerMin, message.power);
-        powerMax = Math.max(powerMax, message.power);
-        if (message.power === 0) {
-          message.power = powerAvg/step
-        } else powerAvg += message.power;
-      }
+  let recordMesgs = workoutData.recordMesgs;
+  if (isNaN(recordMesgs[recordMesgs.length - 1].heartRate)
+    && isNaN(recordMesgs[recordMesgs.length - 1].heartRate)
+    && isNaN(recordMesgs[recordMesgs.length - 1].distance)
+    && isNaN(recordMesgs[recordMesgs.length - 1].power)
+    && isNaN(recordMesgs[recordMesgs.length - 1].enhancedAltitude)) return;
 
-      {
-        if (isNaN(message.heartRate)) message.heartRate = 0;
-        heartRateDistanceArray.push(
-          [(+(message.distance / 1000).toFixed(2)), message.heartRate])
-        heartRateMin = Math.min(heartRateMin, message.heartRate);
-        heartRateMax = Math.max(heartRateMax, message.heartRate);
-        if (message.heartRate === 0) {
-          message.heartRate = heartRateAvg/step
-        } else heartRateAvg += message.heartRate;
-      }
-
-      { if (isNaN(message.cadence)) message.cadence = 0
-        cadenceDistanceArray.push(
-          [(+(message.distance / 1000).toFixed(2)), message.cadence])
-        cadenceMin = Math.min(cadenceMin, message.cadence);
-        cadenceMax = Math.max(cadenceMax, message.cadence);
-        if (message.cadence === 0) {
-          message.cadence = cadenceAvg/step
-        } else cadenceAvg += message.cadence;
-      }
-
-      { if (isNaN(message.altitude)) message.altitude = 0
-        if(message.altitude > 6000) {message.altitude = altitudeAvg/step}; // времянка
-        altitudeDistanceArray.push(
-          [(+(message.distance / 1000).toFixed(2)), message.altitude])
-        altitudeMin = Math.min(altitudeMin, message.altitude);
-        altitudeMax = Math.max(altitudeMax, message.altitude);
-        altitudeAvg += message.altitude;
-      }
+  for (let message of recordMesgs) {
+    if (isNaN(message.distance)) continue;
+   step++;
+   let distance = +(message.distance / 1000).toFixed(2);
+    {if (isNaN(message.speed)) message.speed = 0
+      speedDistanceArray.push(
+        [distance, +(message.speed * 3.6).toFixed(1)])
+      speedMin = Math.min(speedMin, message.speed * 3.6);
+      speedMax = Math.max(speedMax, message.speed * 3.6);
+      speedAvg += (message.speed * 3.6);
     }
 
-    if (step < 1) {
-      console.log(step)
-      return
-    };
+    if (step === 1) timestampStart = message.timestamp;
+    if (step > 1){
+      let stepTime = message.timestamp - recordMesgs[step - 2].timestamp;
+      let stepDistance = (message.distance - recordMesgs[step - 2].distance) / 1000;
+      // if (stepDistance === 0) pace = paceAvg/step;
+      pace = +(stepTime / (stepDistance * 60 * 1000)).toFixed(2); // получаем км/мин
+      paceDistanceArray.push([distance, pace]);
+      // paceMin = Math.min(paceMin, pace);
+      // paceMax = Math.max(paceMax, pace);
+      // paceAvg += Math.round(pace);
+      // console.log(paceAvg);
+    }
 
-    heartRateAvg = Math.round(heartRateAvg/step);
-    speedAvg = +(speedAvg/step).toFixed(1);
-    powerAvg = Math.round(powerAvg/step);
-    cadenceAvg = Math.round(cadenceAvg/step);
-    altitudeAvg = Math.round(altitudeAvg/step);
-    distanceMax = +(r.recordMesgs[r.recordMesgs.length - 1].distance / 1000).toFixed(2);
-  }).then(() => {
-      addChartByValue('speed', configSpeed, speedMin, speedMax, speedAvg, speedDistanceArray);
-      addChartByValue('power', configPower, powerMin, powerMax, powerAvg, powerDistanceArray);
-      addChartByValue('hr',  configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray);
-      addChartByValue('cadence', configCadence, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
-      addChartByValue('altitude', configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray);
-      // console.log(heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray)
-  })
+    {if (isNaN(message.power)) message.power = 0
+      powerDistanceArray.push(
+        [distance, message.power])
+      powerMin = Math.min(powerMin, message.power);
+      powerMax = Math.max(powerMax, message.power);
+      if (message.power === 0) {
+        message.power = powerAvg/step
+      } else powerAvg += message.power;
+    }
+
+    {
+      if (isNaN(message.heartRate)) message.heartRate = 0;
+      heartRateDistanceArray.push(
+        [distance, message.heartRate])
+      heartRateMin = Math.min(heartRateMin, message.heartRate);
+      heartRateMax = Math.max(heartRateMax, message.heartRate);
+      if (message.heartRate === 0) {
+        message.heartRate = heartRateAvg/step
+      } else heartRateAvg += message.heartRate;
+    }
+
+    { if (isNaN(message.cadence)) message.cadence = 0
+      let k = 1;
+      if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run") k = 2;
+      cadenceDistanceArray.push(
+        [distance, message.cadence * k])
+      cadenceMin = Math.min(cadenceMin, message.cadence * k);
+      cadenceMax = Math.max(cadenceMax, message.cadence * k);
+      if (message.cadence === 0) {
+        message.cadence = cadenceAvg/step
+      } else cadenceAvg += message.cadence * k;
+    }
+
+    { if (isNaN(message.enhancedAltitude)) message.enhancedAltitude = 0
+      if(message.enhancedAltitude > 6000) {message.enhancedAltitude = altitudeAvg/step}; // времянка
+      altitudeDistanceArray.push(
+        [distance, Math.round(message.enhancedAltitude)])
+      altitudeMin = Math.min(altitudeMin, message.enhancedAltitude);
+      altitudeMax = Math.max(altitudeMax, message.enhancedAltitude);
+      altitudeAvg += message.enhancedAltitude;
+    }
+  }
+
+  if (step < 1) {
+    console.log(step)
+    return
+  };
+
+  heartRateAvg = heartRateAvg/step;
+  speedAvg = +(speedAvg/step).toFixed(1);
+  powerAvg = Math.round(powerAvg/step);
+  cadenceAvg = Math.round(cadenceAvg/step);
+  altitudeAvg = Math.round(altitudeAvg/step);
+  distanceMax = +(recordMesgs[recordMesgs.length - 1].distance / 1000).toFixed(2);
+  let timeTraining = +(recordMesgs[recordMesgs.length - 1].timestamp - timestampStart) / 60000;
+  paceAvg = +(timeTraining / distanceMax).toFixed(2);
+  console.log(paceAvg, paceDistanceArray, timeTraining, distanceMax);
+  // console.log(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray)
+
+  addChartByValue(configPower, powerMin, powerMax, powerAvg, powerDistanceArray);
+  addChartByValue(configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray);
+  addChartByValue(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray);
+  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "running") {
+    addChartByValue(configPace, 3, paceAvg*1.5, paceAvg, paceDistanceArray);
+    addChartByValue(configCadenceRun, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
+  }
+  else {
+    addChartByValue(configSpeed, speedMin, speedMax, speedAvg, speedDistanceArray);
+    addChartByValue(configCadenceCycl, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
+  }
 }
 
-function addChartByValue (id, config, valueMin, valueMax, valueAvg, data) {
+function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
   if (valueAvg === 0) return;
   // console.log(valueMin, valueMax, valueAvg, data)
   {
-    Highcharts.chart(id, {
+    Highcharts.chart(config.id, {
       chart: {
         type: 'areaspline'
       },
@@ -161,7 +222,7 @@ function addChartByValue (id, config, valueMin, valueMax, valueAvg, data) {
       xAxis: {
         labels: {
           formatter: function () {
-            return this.value + otherWord.placeholderDistance;
+            return this.value + dict.units.km[userLang];
           }
         },
         min: 0,
@@ -210,7 +271,7 @@ function addChartByValue (id, config, valueMin, valueMax, valueAvg, data) {
       },
       tooltip: {
         formatter: function() {
-          return `${this.y} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${otherWord.km}`;
+          return `${this.y.toString().replace('.', ',')} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${dict.units.km[userLang]}`;
         },
         outside: true,
         // positioner: function () {

@@ -137,3 +137,28 @@ td {
 .form-container div label {
   display: block;
 }
+
+
+/*стили экрана просмотра тренировки*/
+#viewBox {
+display: grid;
+  gap: 3rem;
+  grid-template-columns: 2fr 1fr;
+  max-width: 1200px;
+}
+
+.charts{
+  padding: 1rem 0;
+}
+
+#stats {
+  padding-top: 2rem;
+
+}
+
+#stats > li {
+  list-style: none;
+}
+
+
+

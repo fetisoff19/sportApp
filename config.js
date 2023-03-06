@@ -1,3 +1,5 @@
+export let userLang = 'ru'
+
 let fields = {
   timestamp: {
     type: 'object',
@@ -103,18 +105,20 @@ let fields = {
   // editDate:'',
 };
 
-const dict = {
+export const dict = {
   fields: {
     timestamp: {ru: 'Окончание занятия', en: 'Workout end'},
-    startTime: {ru: 'Дата', en:'Date'},
+    startTime: {ru: 'Дата', en: 'Date'},
     totalElapsedTime: {ru: 'Продолжительность', en: 'Duration'},
     totalTimerTime: {ru: 'Время в движении', en: 'Moving time'},
     totalDistance: {ru: 'Дистанция', en: 'Distance'},
     totalStrides: {ru: 'Кол-во шагов', en: 'Strides'},
     totalCalories: {ru: 'Калории', en: 'Calories'},
+    speed: {ru: 'Скорость', en: 'Speed'},
     avgSpeed: {ru: 'Средняя скорость', en: 'Average speed'},
     maxSpeed: {ru: 'Макс. скорость', en: 'Maximum speed'},
     minAltitude: {ru: 'Мин. высота', en: 'Minimum altitude'},
+    altitude: {ru: 'Высота', en: 'Altitude'},
     avgAltitude: {ru: 'Средняя высота', en: 'Average altitude'},
     maxAltitude: {ru: 'Макс. высота', en: 'Maximum altitude'},
     avgGrade: {ru: 'Средний градиент', en: 'Average grade'},
@@ -122,13 +126,27 @@ const dict = {
     totalAscent: {ru: 'Набор', en: 'Ascend'},
     totalDescent: {ru: 'Спуск', en: 'Descend'},
     sport: {ru: 'Вид занятия', en: 'Sport'},
+    power: {ru: 'Мощность', en: 'Power'},
+    avgPower: {ru: 'Средняя мощность', en: 'Average power'},
+    hr: {ru: 'Пульс', en: 'Heart rate'},
+    avgHR: {ru: 'Средний пульс', en: 'Average HR'},
+    cadence: {ru: 'Каденс', en: 'Cadence'},
+    avgCadence: {ru: 'Средний каденс', en: 'Average cadence'},
+    pace: {ru: 'Темп', en: 'Pace',},
+    avgPace: {ru: 'Средний темп', en: 'Average Pace',}
 
   },
   units: {
     s: {ru: 'Секунды', en: 'Seconds'},
-    m: {ru: 'Метры', en: 'Meters'},
+    m: {ru: 'м', en: 'm'},
+    km: {ru: 'км', en: 'km'},
     mps: {ru: 'Метры в секунду', en: 'Meters per second'},
+    kmph: {ru: 'км/ч', en: 'km/h'},
     bpm: {ru: 'уд./мин', en: 'Beats per minute'},
+    w: {ru: 'Вт', en: 'W'},
+    cadenceCycl: {ru: 'об./мин.', en: 'rpm'},
+    cadenceRun: {ru: 'шаг./мин.', en: 'spm'},
+    pace: {ru: '/км', en: '/km'},
 
   },
   sports: {
@@ -148,6 +166,9 @@ const dict = {
     add: {ru: 'Добавить'},
     view: {ru: 'Показать'},
     delete: {ru: 'Удалить'},
-
   },
+  title: {
+    viewTraining: {ru: 'Просмотр тренировки'},
+    trainings: {ru: 'Тренировки'},
+  }
 };
