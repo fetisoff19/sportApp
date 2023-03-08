@@ -42,3 +42,16 @@ export async function htmlFileUrlToNodeList(url) {
   let nodeList = htmlToNodeList(html);
   return nodeList;
 }
+
+export function loadCss(cssUrl) {
+  // 'cssURL' is the stylesheet's URL, i.e. /css/styles.css
+  return new Promise( function(resolve, reject) {
+    let link = document.createElement('link');
+    link.rel  = 'stylesheet';
+    link.href = cssUrl;
+    document.head.appendChild(link);
+    link.onload = function() { 
+      resolve();
+    };
+  });
+}

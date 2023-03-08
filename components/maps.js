@@ -1,7 +1,11 @@
 import * as L from '../node_modules/leaflet/dist/leaflet-src.esm.js';
-import { garminLatLongToNormal } from '../utils.js';
+import { garminLatLongToNormal, loadCss } from '../utils.js';
+
+// const leafletCssLink = "node_modules/leaflet/dist/leaflet.css";
+// if (document.querySelector(`[href="${leafletCssLink}"]`)==null) await loadCss(leafletCssLink);
 
 export function createMapWithWorkoutRoute(workoutData, appendTo, height, width) {
+
   const polylinePoints = [];
   for (let rec of workoutData.recordMesgs) {
     if (!rec.hasOwnProperty('positionLat')) continue;

@@ -8,7 +8,7 @@ export class Screen {
   // htmlUrl;
   
   constructor(options) {
-    if (!'name' in options || !'start' in options) {
+    if (!('name' in options) || !('start' in options)) {
       throw 'missing screen options';
     }
     for (let optName in options) this[optName] = options[optName];
