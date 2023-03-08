@@ -1,10 +1,9 @@
+import { Screen } from './Screen.js';
 import {addCharts} from "../components/highCharts.js";
 import {otherWord} from "../language.js";
-import {db} from "../db";
-import {dict, userLang} from "../config";
-import {createMapWithWorkoutRoute} from "../components/maps";
-
-export let training = {};
+import {db} from "../db.js";
+import {dict, userLang} from "../config.js";
+import {createMapWithWorkoutRoute} from "../components/maps.js";
 
 const page = `
 <h2 id="viewTrainingH2"></h2>
@@ -27,14 +26,16 @@ const page = `
 </div>
 `
 
-export const highChartsScreen = {
+export const highChartsScreen = new Screen({
+  name: 'highChartsScreen',
   title: dict.title.viewTraining[userLang],
   start: startHighChartsScreen,
   path: "?screen=highcharts.js",
   html: page,
-}
+});
 
-async function startHighChartsScreen() {
+async function startHighChartsScreen(options) {
+  let training = options.workout;
   if (training.isManual) {
     addStats (training);
     training = {}; // необходимо обнулять объект каждый раз после

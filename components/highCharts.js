@@ -1,11 +1,10 @@
 import {db} from "../db.js";
 import {filterKey, otherWord} from "../language.js";
-import Highcharts from 'highcharts';
-import Exporting from 'highcharts/modules/exporting';
-import {dict, userLang} from "../config";
-import {training} from "../screens/highChartsScreen";
-import {getMinSec} from "../functionsDate";
-Exporting(Highcharts);
+import {dict, userLang} from "../config.js";
+import {getMinSec} from "../functionsDate.js";
+import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
+//import Accessibility from '../node_modules/highcharts/es-modules/Accessibility/Accessibility.js';
+
 
 let distanceMax = 0;
 let timestampStart = {};

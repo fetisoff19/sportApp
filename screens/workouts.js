@@ -1,12 +1,12 @@
+import { Screen } from './Screen.js';
 import {parseFit, sha256File } from '../utils.js';
 import {db, addWorkout, deleteWorkout, setIndexedDbUsageInfo} from '../db.js';
 import {copyKeyInObj} from "../makeWorkout.js";
 import {ButtonComponent} from "../components/buttonComponent.js";
-import {otherWord, setLanguage, } from "../language.js";
+import {otherWord, } from "../language.js";
 import {openView} from "../viewTraining.js";
 import {openCreateForm, openEditForm} from "../formFunction.js";
-import {training} from './highChartsScreen'
-import {dict as dist, userLang} from "../config";
+import {dict as dist, userLang} from "../config.js";
 
 let workouts = {}; // вынесено в отдельный файл
 
@@ -35,13 +35,14 @@ const workoutsScreenHtml = `
   </table>
 `;
 
-export const workoutsScreen = {
+export const workoutsScreen = new Screen({
+  name: 'workoutsScreen',
   navName: dist.title.trainings[userLang],
   title: dist.title.trainings[userLang],
   start: workoutsStart,
   path: "?screen=workouts", //костыль чтобы работала перезагрузка страницы
   html: workoutsScreenHtml
-}
+});
 
 function workoutsStart(startOptions) {
   fillWorkoutsTable(startOptions);
@@ -150,19 +151,13 @@ function del(e) {
 }
 
 function openHighcharts(e, startOptions) {
+  let workoutId = parseInt(e.target.parentElement.parentElement.dataset.id);
+  let workout = workouts.find(w=>w.id===workoutId)
   let hcOptions = {
     ...startOptions,
-    ...{
-      workoutsId: +e.target.parentElement.parentElement.dataset.id
-    }
+    workout,
   };
-  startOptions.switchToScreen('highChartsScreen', hcOptions);
-  for (let workout of workouts) {
-    if (workout.id === hcOptions.workoutsId) {
-       Object.assign(training, workout)  // сохраняем и передаём данные тренировку в экран highChartsScreen
-    }
-  }
-
+  startOptions.app.switchToScreen('highChartsScreen', hcOptions);
 }
 
 async function saveJsonFileFromFit(file) {
