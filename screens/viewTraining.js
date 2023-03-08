@@ -9,7 +9,6 @@ export const viewTrainingScreen = new Screen({
   name: 'viewTrainingScreen',
   title: "WORKOUTS",
   start: viewTraining,
-  path: "?screen=workouts", //костыль чтобы работала перезагрузка страницы
   html: viewTrainingScreenHtml
 });
 

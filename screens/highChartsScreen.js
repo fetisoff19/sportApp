@@ -30,25 +30,25 @@ export const highChartsScreen = new Screen({
   name: 'highChartsScreen',
   title: dict.title.viewTraining[userLang],
   start: startHighChartsScreen,
-  path: "?screen=highcharts.js",
   html: page,
 });
 
 async function startHighChartsScreen(options) {
-  let training = options.workout;
+  let workoutId = options.urlParams.workoutId;
+  let training = await db.get('workouts', +workoutId);
   if (training.isManual) {
     addStats (training);
-    training = {}; // необходимо обнулять объект каждый раз после
     return
   };
   let viewTrainingH2 = document.getElementById('viewTrainingH2');
   let map = document.getElementById('map')
   viewTrainingH2.innerText = dict.title.viewTraining[userLang] + ' ' + training.name;
+
   db.get('workoutsData', +training.id).then(workoutData => {
     addCharts(training, workoutData);
     createMapWithWorkoutRoute(workoutData, map, 300, 400);
     addStats (training, workoutData)
-  }).then(() => training = {})
+  }).then();
 }
 
 function addStats (training, workoutData) {

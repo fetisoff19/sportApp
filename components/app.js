@@ -5,6 +5,7 @@ export class App {
 
   appTitle;
   screens; //array of Screens
+  startScreenName;
 
   screenContainer;
   screenStartOptions = {};
@@ -23,6 +24,7 @@ export class App {
 
   constructor(options) {
     for (let optName in options) this[optName] = options[optName];
+    if (!options?.startScreenName || !options?.appTitle) throw 'missing options';
   }
 
   start() {
@@ -38,13 +40,23 @@ export class App {
     this.#setAppNav();
     setIndexedDbUsageInfo();
     let currentPath = window.location.href.split('/')[3];
-    if (currentPath==='') currentPath = '/';
-    for (let screen of this.screens) {
-      if (screen.path!==currentPath) continue;
-      this.#switchScreen(screen);
-      window.history.replaceState(screen.name, '', screen.path);
-      break;
+    
+    if (currentPath==='') {
+      this.#switchScreen(this.startScreenName);
+      window.history.replaceState(this.startScreenName, '', currentPath);
+      return;
     }
+
+    let urlParams = new URLSearchParams(window.location.href.split('/')[3].split('?')[1]);
+    let curScreenName = urlParams.get('screen');
+    let screen = this.screens.find(s=>s.name===curScreenName);
+
+    let options = Object.assign(
+      {urlParams: Object.fromEntries(urlParams)}, 
+      this.screenStartOptions
+    );
+    this.#switchScreen(screen, options);
+    window.history.replaceState(curScreenName, '', currentPath);
   }
 
   async #switchScreen(screen, startOptions=this.screenStartOptions) {
@@ -83,14 +95,25 @@ export class App {
     if (curScrName===prevScrName) return;
     let screen = this.screens.find(s=>s.name===curScrName);
     this.#switchScreen(screen);
-    window.history.pushState(curScrName, '', screen.path);
+    let path = curScrName===this.startScreenName ? '/' : this.#getScreenBasePath(curScrName);
+    window.history.pushState(curScrName, '', path);
   }
 
   switchToScreen = (screenNameOrObj, startOptions)=> {
     this.#switchScreen(screenNameOrObj, startOptions).then(scr=>{
-      window.history.pushState(scr.name, '', scr.path);
+      let path;
+      if (startOptions?.urlParams) {
+        let fullParams = Object.assign({screen: scr.name}, startOptions.urlParams);
+        path = '?'+new URLSearchParams(fullParams).toString();
+      }
+      else {
+        path = this.#getScreenBasePath(scr.name);
+      }
+      window.history.pushState(scr.name, '', path);
     });
   }
+
+  #getScreenBasePath = (screenName)=>`?screen=${screenName}`;
 
   #setScreenTitle(screen) {
       document.title = screen.title ? 
@@ -105,13 +128,13 @@ export class App {
     }
     let curItem = document.querySelector(`[data-screen="${screen.name}"]`);
   
-    if (screen.path!=='/' && curItem!=null) curItem.classList.add('app-nav-item-selected');
+    if (screen.name!==this.startScreenName && curItem!=null) curItem.classList.add('app-nav-item-selected');
   }
 
   #setAppNav() {
     let logo = document.querySelector('#app-logo');
     logo.innerHTML = this.appTitle;
-    logo.dataset.screen = 'startScreen';
+    logo.dataset.screen = this.startScreenName;
     logo.addEventListener('click', this.navSwitchScreen);
     let nav = document.querySelector('#app-nav');
     for (let screen of this.screens) {

@@ -5,7 +5,6 @@ export class Screen {
 
   // navName;
   // title;
-  // path;
   // htmlUrl;
   
   constructor(options) {

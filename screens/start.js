@@ -6,7 +6,6 @@ const page = `
 export const startScreen = new Screen({
   name: 'startScreen',
   start: startStartScreen,
-  path: "/",
   html: page,
 });
 

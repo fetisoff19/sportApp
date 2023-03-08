@@ -40,7 +40,6 @@ export const workoutsScreen = new Screen({
   navName: dist.title.trainings[userLang],
   title: dist.title.trainings[userLang],
   start: workoutsStart,
-  path: "?screen=workouts", //костыль чтобы работала перезагрузка страницы
   html: workoutsScreenHtml
 });
 
@@ -152,10 +151,9 @@ function del(e) {
 
 function openHighcharts(e, startOptions) {
   let workoutId = parseInt(e.target.parentElement.parentElement.dataset.id);
-  let workout = workouts.find(w=>w.id===workoutId)
   let hcOptions = {
     ...startOptions,
-    workout,
+    urlParams: {workoutId}
   };
   startOptions.app.switchToScreen('highChartsScreen', hcOptions);
 }
