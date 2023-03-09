@@ -39,24 +39,33 @@ export class App {
     window.addEventListener('popstate', this.browserNavSwitchScreen);
     this.#setAppNav();
     setIndexedDbUsageInfo();
-    let currentPath = window.location.href.split('/')[3];
+    let currentPath = this.#getCurrentPath();
     
     if (currentPath==='') {
       this.#switchScreen(this.startScreenName);
       window.history.replaceState(this.startScreenName, '', currentPath);
       return;
     }
-
-    let urlParams = new URLSearchParams(window.location.href.split('/')[3].split('?')[1]);
+    
+    let urlParams = new URLSearchParams(currentPath.split('?')[1]);
     let curScreenName = urlParams.get('screen');
     let screen = this.screens.find(s=>s.name===curScreenName);
 
-    let options = Object.assign(
-      {urlParams: Object.fromEntries(urlParams)}, 
-      this.screenStartOptions
-    );
+    let options = this.#addUrlParamsToScrStartOptions(currentPath);
+
     this.#switchScreen(screen, options);
     window.history.replaceState(curScreenName, '', currentPath);
+  }
+
+  #getCurrentPath = ()=>window.location.href.split('/')[3];
+
+  #addUrlParamsToScrStartOptions(currentPath) {
+    let urlParams = new URLSearchParams(currentPath.split('?')[1]);
+    let options = Object.assign(
+      {urlParams: Object.fromEntries(urlParams)},
+      this.screenStartOptions
+    );
+    return options;
   }
 
   async #switchScreen(screen, startOptions=this.screenStartOptions) {
@@ -86,7 +95,11 @@ export class App {
   browserNavSwitchScreen = ()=> {
     let curScrName = window.history.state;
     let screen = this.screens.find(s=>s.name===curScrName);
-    this.#switchScreen(screen);
+
+    let currentPath = this.#getCurrentPath();
+    let options = this.#addUrlParamsToScrStartOptions(currentPath);
+
+    this.#switchScreen(screen, options);
   }
 
   navSwitchScreen = (e)=> {
