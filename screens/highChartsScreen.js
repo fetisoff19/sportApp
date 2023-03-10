@@ -3,8 +3,6 @@ import {addCharts} from "../components/highCharts.js";
 import {db} from "../db.js";
 import {dict, userLang} from "../config.js";
 import {createMapWithWorkoutRoute} from "../components/maps.js";
-import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
-import * as L from '../node_modules/leaflet/dist/leaflet-src.esm.js';
 
 const page = `
 <h2 id="viewTrainingH2"></h2>

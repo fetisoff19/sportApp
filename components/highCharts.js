@@ -1,5 +1,5 @@
 import * as L from '../node_modules/leaflet/dist/leaflet-src.esm.js';
-import { garminLatLongToNormal, loadCss } from '../utils.js';
+import { garminLatLongToNormal } from '../utils.js';
 import {dict, userLang} from "../config.js";
 import {getMinSec} from "../functionsDate.js";
 import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
@@ -200,7 +200,6 @@ export function addCharts(training, workoutData, map) {
     }
   }
 
-
   if (step < 1) {
     console.log(step)
     return
@@ -232,7 +231,6 @@ export function addCharts(training, workoutData, map) {
   }
   addStatsLive();
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
-  console.log(stepTimeArray, speedDistanceArray)
 }
 
 function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
@@ -271,17 +269,13 @@ function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
       enabled: true
     },
     yAxis: [{
-      // scrollbar: {
-      //   enabled: true,
-      //   showFull: false
-      // },
       title: {
         text: '',
       },
       min: valueMin,
       reversed: config.reversed,
       // max: valueMax,
-      plotLines: [{ // mark the weekend
+      plotLines: [{
         color: '#383838',
         width: 1,
         value: valueAvg,
@@ -406,7 +400,6 @@ function addStatsLive () {
   div.append(span);
 }
 
-
 function fillStatsLive (index) {
   let spanDistance = document.querySelector('.spanDistance');
   let x = Highcharts.charts[0].series[0].points[index].x;
@@ -418,4 +411,3 @@ function fillStatsLive (index) {
     span.innerHTML = chart.series[0].points[index].y;
   }
 }
-
