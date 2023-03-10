@@ -33,4 +33,6 @@ export function createMapWithWorkoutRoute(workoutData, appendTo, height, width) 
   
   let polyline = L.polyline(polylinePoints).addTo(map);
   map.fitBounds(polyline.getBounds());
+
+  return map;
 }

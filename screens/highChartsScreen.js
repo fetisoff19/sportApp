@@ -1,9 +1,10 @@
 import { Screen } from './Screen.js';
 import {addCharts} from "../components/highCharts.js";
-import {otherWord} from "../language.js";
 import {db} from "../db.js";
 import {dict, userLang} from "../config.js";
 import {createMapWithWorkoutRoute} from "../components/maps.js";
+import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
+import * as L from '../node_modules/leaflet/dist/leaflet-src.esm.js';
 
 const page = `
 <h2 id="viewTrainingH2"></h2>
@@ -19,6 +20,7 @@ const page = `
   </div>
   <div>
     <div id="map"></div>
+    <div id="statsLive"></div>
     <div>
         <span id="stats"></span>
     </div>
@@ -41,14 +43,14 @@ async function startHighChartsScreen(options) {
     return
   };
   let viewTrainingH2 = document.getElementById('viewTrainingH2');
-  let map = document.getElementById('map')
+  let mapElem = document.getElementById('map')
   viewTrainingH2.innerText = dict.title.viewTraining[userLang] + ' ' + training.name;
 
   db.get('workoutsData', +training.id).then(workoutData => {
-    addCharts(training, workoutData);
-    createMapWithWorkoutRoute(workoutData, map, 300, 400);
-    addStats (training, workoutData)
-  }).then();
+    let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, 400);
+    addCharts(training, workoutData, map);
+    addStats (training, workoutData);
+  });
 }
 
 function addStats (training, workoutData) {
