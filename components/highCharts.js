@@ -230,22 +230,22 @@ export function addCharts(training, workoutData, map) {
   while (Highcharts.charts.length>0) Highcharts.charts.pop(); //очищаем глобальную переменную Highcharts от старых графиков
   // console.log(Highcharts.charts)
 
-  addChartByValue(configPower, powerMin, powerMax, powerAvg, powerDistanceArray, stepTimeArray);
-  addChartByValue(configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray, stepTimeArray);
-  addChartByValue(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray, stepTimeArray);
+  addChartByValue(configPower, powerAvg, powerDistanceArray, stepTimeArray);
+  addChartByValue(configHeartRate, heartRateAvg, heartRateDistanceArray, stepTimeArray);
+  addChartByValue(configAltitude, altitudeAvg, altitudeDistanceArray, stepTimeArray);
   if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "running") {
-    addChartByValue(configPace, paceMin, paceMax, paceAvg, paceDistanceArray, stepTimeArray);
-    addChartByValue(configCadenceRun, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray, stepTimeArray);
+    addChartByValue(configPace, paceAvg, paceDistanceArray, stepTimeArray);
+    addChartByValue(configCadenceRun, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   }
   else {
-    addChartByValue(configSpeed, speedMin, speedMax, speedAvg, speedDistanceArray, stepTimeArray);
-    addChartByValue(configCadenceCycl, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray, stepTimeArray);
+    addChartByValue(configSpeed, speedAvg, speedDistanceArray, stepTimeArray);
+    addChartByValue(configCadenceCycl, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   }
   addStatsLive();
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
 }
 
-function addChartByValue (config, valueMin, valueMax, valueAvg, data, time) {
+function addChartByValue (config, valueAvg, data, time) {
   if (valueAvg === 0) return;
   let avgText = '';
   { if (config.type) avgText = getMinSec(valueAvg);
@@ -290,6 +290,7 @@ function addChartByValue (config, valueMin, valueMax, valueAvg, data, time) {
       rangeSelector: {
         enabled: true
       },
+
       yAxis: [{
         title: {
           text: '',
@@ -346,7 +347,7 @@ function addChartByValue (config, valueMin, valueMax, valueAvg, data, time) {
         },
       },
       tooltip: {
-        // enabled: false,
+        enabled: false,
         formatter:
           function() {
             if(config.type) this.y = getMinSec(this.y);
