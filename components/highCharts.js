@@ -7,7 +7,7 @@ import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts
 let polylinePoints = [];
 let marker = {};
 let distanceMax = 0;
-
+let active = false;
 let configSpeed = {
   id: 'speed',
   title: dict.fields.speed[userLang],
@@ -82,6 +82,7 @@ export function addCharts(training, workoutData, map) {
   let smoothing = 4;
   let step = 0;
   let avgTimeSmoothing = 0;
+  let distanceArray = [];
   let stepTimeArray = [];
 
   let speedDistanceArray = [];
@@ -90,13 +91,13 @@ export function addCharts(training, workoutData, map) {
   let speedAvg = 0;
   let avgSpeedSmoothing = 0;
 
-  let powerDistanceArray = []
+  let powerDistanceArray = [];
   let powerMin = 2000;
   let powerMax = 0;
   let powerAvg = 0;
   let avgPowerSmoothing = 0;
 
-  let heartRateDistanceArray = []
+  let heartRateDistanceArray = [];
   let heartRateMin = 250;
   let heartRateMax = 0;
   let heartRateAvg = 0;
@@ -104,19 +105,19 @@ export function addCharts(training, workoutData, map) {
 
   let k = 1;
   if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run") k = 2;
-  let cadenceDistanceArray = []
+  let cadenceDistanceArray = [];
   let cadenceMin = 500;
   let cadenceMax = 0;
   let cadenceAvg = 0;
   let avgCadenceSmoothing = 0;
 
-  let altitudeDistanceArray = []
+  let altitudeDistanceArray = [];
   let altitudeMin = 8000;
   let altitudeMax = 0;
   let altitudeAvg = 0;
   let avgAltitudeSmoothing = 0;
 
-  let paceDistanceArray = []
+  let paceDistanceArray = [];
   let paceMin = 100;
   let paceMax = 1;
   let pace = 0;
@@ -129,9 +130,9 @@ export function addCharts(training, workoutData, map) {
 
     let distance = +(recordMesgs[i].distance / 1000).toFixed(2); // км
     let speed = +(recordMesgs[i].speed * 3.6).toFixed(1); // км/ч
-    let power = Math.round(recordMesgs[i].power); // Вт
-    let heartRate = Math.round(recordMesgs[i].heartRate);
-    let cadence = Math.round(recordMesgs[i].cadence) * k;
+    let power = recordMesgs[i].power; // Вт
+    let heartRate = recordMesgs[i].heartRate;
+    let cadence = recordMesgs[i].cadence * k;
     let altitude = Math.round(recordMesgs[i].enhancedAltitude); // м
 
     if (isNaN(speed)) speed = 0;
@@ -166,7 +167,7 @@ export function addCharts(training, workoutData, map) {
     altitudeMin = Math.min(altitudeMin, altitude);
     altitudeMax = Math.max(altitudeMax, altitude);
     altitudeAvg += altitude;
-    stepTimeArray.push([Math.round(avgTimeSmoothing), 0]);
+
     if (i > 0){
       let stepTime = (recordMesgs[i].timestamp - recordMesgs[i - 1].timestamp) / 1000  ;  // получаем время в секундах между соседними элементами массива
       let stepDistance = (recordMesgs[i].distance - recordMesgs[i - 1].distance) / 1000; // получаем расстояние в км между соседними элементами массива
@@ -176,6 +177,16 @@ export function addCharts(training, workoutData, map) {
       avgPaceSmoothing += pace;
       paceAvg += pace;
       avgTimeSmoothing += stepTime;
+    }
+
+    if (i == smoothing) {
+      speedDistanceArray.push([0, +(avgSpeedSmoothing / smoothing).toFixed(1)]);
+      powerDistanceArray.push([0, Math.round(avgPowerSmoothing / smoothing)]);
+      heartRateDistanceArray.push([0, Math.round(avgHeartRateSmoothing / smoothing)])
+      cadenceDistanceArray.push([0, Math.round(avgCadenceSmoothing / smoothing)])
+      altitudeDistanceArray.push([0, Math.round(avgAltitudeSmoothing / smoothing)]);
+      paceDistanceArray.push([0, +(avgPaceSmoothing / smoothing).toFixed(2)]);
+      stepTimeArray.push([0, 0]);
     }
 
     if (!(i % smoothing) && i > 0) {
@@ -196,7 +207,7 @@ export function addCharts(training, workoutData, map) {
       avgPaceSmoothing = 0;
 
       if (recordMesgs[i].hasOwnProperty('positionLat') && map)
-      polylinePoints.push( garminLatLongToNormal([recordMesgs[i].positionLat, recordMesgs[i].positionLong]) );
+        polylinePoints.push( garminLatLongToNormal([recordMesgs[i].positionLat, recordMesgs[i].positionLong]) );
     }
   }
 
@@ -218,114 +229,129 @@ export function addCharts(training, workoutData, map) {
   // console.log(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray)
   while (Highcharts.charts.length>0) Highcharts.charts.pop(); //очищаем глобальную переменную Highcharts от старых графиков
   // console.log(Highcharts.charts)
-  addChartByValue(configPower, powerMin, powerMax, powerAvg, powerDistanceArray);
-  addChartByValue(configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray);
-  addChartByValue(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray);
+
+  addChartByValue(configPower, powerMin, powerMax, powerAvg, powerDistanceArray, stepTimeArray);
+  addChartByValue(configHeartRate, heartRateMin, heartRateMax, heartRateAvg, heartRateDistanceArray, stepTimeArray);
+  addChartByValue(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray, stepTimeArray);
   if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "running") {
-    addChartByValue(configPace, paceMin, paceMax, paceAvg, paceDistanceArray);
-    addChartByValue(configCadenceRun, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
+    addChartByValue(configPace, paceMin, paceMax, paceAvg, paceDistanceArray, stepTimeArray);
+    addChartByValue(configCadenceRun, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   }
   else {
-    addChartByValue(configSpeed, speedMin, speedMax, speedAvg, speedDistanceArray);
-    addChartByValue(configCadenceCycl, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray);
+    addChartByValue(configSpeed, speedMin, speedMax, speedAvg, speedDistanceArray, stepTimeArray);
+    addChartByValue(configCadenceCycl, cadenceMin, cadenceMax, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   }
   addStatsLive();
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
 }
 
-function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
+function addChartByValue (config, valueMin, valueMax, valueAvg, data, time) {
   if (valueAvg === 0) return;
   let avgText = '';
   { if (config.type) avgText = getMinSec(valueAvg);
   else avgText = valueAvg.toString().replace('.', ',')
 
-  new Highcharts.chart(config.id, {
-    chart: {
-      type: 'line',
-      zoomType: 'x',
-      panning: true,
-      panKey: 'shift',
-      events: {
-        selection : zooming,
-      }
-    },
-    title: {
-      text: config.title,
-      },
-      legend: {
-        enabled: false
-      },
-    xAxis: [{
-      labels: {
-        formatter: function () {
-          return this.value + dict.units.km[userLang];
-        },
-      },
-      min: 0,
-      max: distanceMax,
-      crosshair: true,
-    }],
-    rangeSelector: {
-      enabled: true
-    },
-    yAxis: [{
-      title: {
-        text: '',
-      },
-      min: valueMin,
-      reversed: config.reversed,
-      // max: valueMax,
-      plotLines: [{
-        color: '#383838',
-        width: 1,
-        value: valueAvg,
-        dashStyle: 'shortdash',
-        label: {
-          text: `${config.plotLinesText}<br/>${avgText} ${config.plotLinesTextValue}`, // `${filterKey.avgHeartRate}` + ': ' + `${otherWord.hrm}`, // Content of the label.
-          align: 'right', // Positioning of the label.
-          x: - 20,
-          y: 20,
-          style:{
-            fontWeight: 'bold',
-            color: '#383838',
-          }
-        },
-        zIndex: 5
-      }],
-    }],
-    series: [{
-      data: data,
-      name: config.id,
-      color: config.colorLine,
-      lineWidth: 1,
-      marker: { radius: 1 },
-      point: {
+    Highcharts.chart(config.id, {
+      chart: {
+        height: 200,
+        spacingTop: 0,
+        type: 'areaspline',
+        // styledMode: true,
+        zoomType: 'x',
+        panning: true,
+        panKey: 'shift',
         events: {
-          mouseOver: function() {
-            synchronize(this);
-          },
+          selection : zooming,
         }
       },
-    }],
-    plotOptions: {
-      areaspline: {
-        fillOpacity: 1,
+      title: {
+        text: config.title,
+        align: 'left',
+        x: 0,
+        y: 25,
+        style: {
+          color: config.colorLine,
+          fontWeight: 'bold',
+        },
       },
-    },
-    tooltip: {
+      legend: {
+        enabled: false,
+      },
+      xAxis: [{
+        labels: {
+          formatter: function () {
+            return this.value + dict.units.km[userLang];
+          },
+        },
+        min: 0,
+        max: distanceMax,
+        crosshair: true,
+      }],
+      rangeSelector: {
+        enabled: true
+      },
+      yAxis: [{
+        title: {
+          text: '',
+        },
+        labels: {
+          align: 'left',
+          x: 0,
+          y: -2,
+        },
+        reversed: config.reversed,
+        plotLines: [{
+          color: '#383838',
+          width: 1,
+          value: valueAvg,
+          dashStyle: 'shortdash',
+          label: {
+            text: `${config.plotLinesText} ${avgText} ${config.plotLinesTextValue}`, // `${filterKey.avgHeartRate}` + ': ' + `${otherWord.hrm}`, // Content of the label.
+            align: 'right',
+            x: - 15,
+            y: 15,
+            style:{
+              fontWeight: 'bold',
+              color: '#383838',
+              textShadow: 'white 0 0 10px',
+            }
+          },
+          zIndex: 5
+        }],
+      }],
+      series: [{
+        data: data,
+        name: config.id,
+        color: config.colorLine,
+        lineWidth: 1,
+        marker: { radius: 1 },
+        point: {
+          events: {
+            mouseOver: function() {
+              synchronizeMouseOver(this);
+            },
+            mouseOut: function () {
+              active = false;
+              synchronizeMouseOut()
+            }
+          }
+        },
+      }, {
+        visible: false,
+        data: time,
+      }],
+      plotOptions: {
+        areaspline: {
+          fillOpacity: 1,
+        },
+      },
+      tooltip: {
+        // enabled: false,
         formatter:
           function() {
             if(config.type) this.y = getMinSec(this.y);
             return `${this.y.toString().replace('.', ',')} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${dict.units.km[userLang]}`;
           },
-        // outside: true,
-        // positioner: function () {
-        //   return {y: this.y};
-        // },
-        // distance: 500,
-        // tooltip: {
-        //   snap: 5000
-        // },
         backgroundColor: {
           linearGradient: [0, 0, 0, 60],
           stops: [
@@ -336,14 +362,55 @@ function addChartByValue (config, valueMin, valueMax, valueAvg, data) {
         borderWidth: 1,
         borderColor: '#AAA'
       },
-  });
+    });
   }
-    // console.timeEnd(config.id);
 }
 
-function synchronize(point) {
+
+function synchronizeMouseOut() {
+  let div = document.getElementById('charts-container');
+  let width = (+document.querySelector('.highcharts-plot-border').getAttribute('width'))
+  let mouse = document.querySelector('.mouse');
+  let rect = div.getBoundingClientRect();
+  div.addEventListener('mousemove', (e) => {
+    if (active) return;
+    let charts = Highcharts.charts;
+    let padding = charts[0].plotLeft; // необходимо вычислить
+    let x = (e.clientX - rect.x - padding);
+    if (x < 0) x = 0;
+    if (x > width) x = width;
+    let chartsLength = charts[0].series[0].xAxis.series[0].points.length;
+    let indexProcessedXData = Math.round(charts[0].series[0].processedXData.length * (x / 732));
+    let value = charts[0].series[0].processedXData[indexProcessedXData]
+
+    let indexSeries0 = charts[0].series[0].xData.findIndex(item => item == value)
+    mouse.innerHTML = `
+    x: ${x} </br> 
+    index: ${indexSeries0} </br> 
+    value: ${value} </br>
+    chartsLength: ${chartsLength} </br>
+  `;
+    fillStatsLive(indexSeries0);
+    if (polylinePoints[indexSeries0]) {
+      marker.setLatLng(polylinePoints[indexSeries0]);
+    }
+    for (let chart of charts) {
+      if (chart.customCrosshair) {
+        chart.customCrosshair.element.remove();
+      }
+      chart.customCrosshair = chart.renderer.rect(+x + chart.plotLeft - 1, chart.plotTop, 0.5, chart.plotSizeY).attr({
+        fill: '#383838',
+        zIndex: 5,
+      }).add()
+      // chart.tooltip.refresh([chart.series[0].points[index]]);
+    }
+  })
+}
+
+function synchronizeMouseOver(point) {
+  active = true;
   for (let chart of Highcharts.charts) {
-    let index = chart.series[0].processedXData.findIndex(item => item == point.options.x);
+    let indexSeries0 = chart.series[0].xData.findIndex(item => item === point.category);
     if (chart.customCrosshair) {
       chart.customCrosshair.element.remove();
     }
@@ -351,12 +418,13 @@ function synchronize(point) {
       fill: '#383838',
       zIndex: 5,
     }).add()
-    chart.tooltip.refresh([chart.series[0].points[index]]);
-    fillStatsLive(index);
-
-    if (polylinePoints[index]) {
-      marker.setLatLng(polylinePoints[index]);
+    // chart.tooltip.refresh([chart.series[0].points[indexSeries0]]);
+    fillStatsLive(indexSeries0);
+    if (polylinePoints[indexSeries0]) {
+      marker.setLatLng(polylinePoints[indexSeries0]);
     }
+    let pointSpan = document.querySelector('.spanPoint');
+    pointSpan.innerHTML = point.plotX;
   }
 }
 
@@ -390,24 +458,67 @@ function addStatsLive () {
     statsLive.append(div);
     div.append(span);
   }
-  let div = document.createElement('div');
-  let span = document.createElement('span');
-  span.classList.add('spanDistance');
-  div.classList.add('divDistance', 'divStatsLive');
-  div.innerHTML = 'Distance: ';
-  span.innerHTML = '--';
-  statsLive.append(div);
-  div.append(span);
+  let divDistance = document.createElement('div');
+  let divTime = document.createElement('div');
+  let spanDistance = document.createElement('span');
+  let spanTime = document.createElement('span');
+
+  let pointSpan = document.createElement('span');
+  let activeSpan = document.createElement('span');
+  let mouse = document.createElement('span');
+  let pointDiv = document.createElement('div');
+  mouse.classList.add('mouse');
+  pointDiv.classList.add('divPoint');
+  pointSpan.classList.add('spanPoint');
+  activeSpan.classList.add('active');
+  pointDiv.innerHTML = 'PointX: ';
+  pointSpan.innerHTML = '--';
+  activeSpan.innerHTML = active;
+
+
+  divDistance.classList.add('divDistance', 'divStatsLive');
+  spanDistance.classList.add('spanDistance');
+  divDistance.innerHTML = 'Distance: ';
+  spanDistance.innerHTML = '--';
+
+  divTime.classList.add('divTime', 'divStatsLive');
+  spanTime.classList.add('spanTime');
+  divTime.innerHTML = 'Time: ';
+  spanTime.innerHTML = '--';
+
+  statsLive.append(divDistance);
+  divDistance.append(spanDistance);
+  statsLive.append(divTime);
+  divTime.append(spanTime);
+
+  statsLive.append(pointDiv);
+  pointDiv.append(pointSpan);
+  pointDiv.after(activeSpan);
+  pointDiv.after(mouse);
 }
 
-function fillStatsLive (index) {
+function fillStatsLive (indexSeries0) {
+  let spanActive = document.querySelector('.active');
+  spanActive.innerHTML = active
   let spanDistance = document.querySelector('.spanDistance');
-  let x = Highcharts.charts[0].series[0].points[index].x;
-  spanDistance.innerHTML = x;
-
+  let spanTime = document.querySelector('.spanTime');
+  if (Highcharts.charts[0].series[0].xData[indexSeries0]) {
+    let value = Highcharts.charts[0].series[0].xData[indexSeries0];
+    let sec = Highcharts.charts[0].series[1].xData[indexSeries0];
+    spanDistance.innerHTML = value;
+    spanTime.innerHTML = sec;
+  }
+  // console.log(Highcharts.charts[0].series[1].xData, Highcharts.charts[0].series[0].points)
   for (let chart of Highcharts.charts) {
-    let name = chart.series[0].name;
-    let span = document.querySelector(`.span${name}`);
-    span.innerHTML = chart.series[0].points[index].y;
+    if (chart.series[0].yData[indexSeries0]) {
+      let name = chart.series[0].name;
+      let span = document.querySelector(`.span${name}`);
+      span.innerHTML = chart.series[0].yData[indexSeries0];
+    }
   }
 }
+
+
+
+
+

@@ -7,7 +7,7 @@ import {createMapWithWorkoutRoute} from "../components/maps.js";
 const page = `
 <h2 id="viewTrainingH2"></h2>
 <div id="viewBox">
-  <div id="viewCharts">
+  <div id="charts-container">
     <div id="speed" class="charts" ></div>
     <div id="pace" class="charts" ></div>
     <div id="power" class="charts" ></div>
