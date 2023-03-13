@@ -173,7 +173,7 @@ display: grid;
 #mainInfo {
   display: grid;
   gap: 1rem;
-  grid-template-columns: repeat(3, 120px);
+  grid-template-columns: repeat(3, 130px);
   justify-items: start;
   align-items: start;
 }
