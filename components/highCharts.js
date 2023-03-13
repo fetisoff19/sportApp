@@ -1,71 +1,31 @@
 import * as L from '../node_modules/leaflet/dist/leaflet-src.esm.js';
 import { garminLatLongToNormal } from '../utils.js';
-import {dict, userLang} from "../config.js";
-import {getMinSec} from "../functionsDate.js";
+import {
+  configAltitude, configCadenceCycl,
+  configCadenceRun,
+  configHeartRate,
+  configPace,
+  configPower,
+  configSpeed,
+  dict,
+  userLang
+} from "../config.js";
+import {getHourMinSec, getMinSec} from "../functionsDate.js";
 import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
 
 let polylinePoints = [];
 let marker = {};
 let distanceMax = 0;
 let active = false;
+let speedAvg = 0;
+let paceAvg = 0;
+let powerAvg = 0;
 
-let configSpeed = {
-  id: 'speed',
-  title: dict.fields.speed[userLang],
-  plotLinesText: dict.fields.avgSpeed[userLang],
-  plotLinesTextValue: dict.units.kmph[userLang],
-  colorLine: 'blue',
-  reversed: false,
-}
-let configPace = {
-  id: 'pace',
-  title: dict.fields.pace[userLang],
-  plotLinesText: dict.fields.avgPace[userLang],
-  plotLinesTextValue: dict.units.pace[userLang],
-  colorLine: 'blue',
-  type: 'pace',
-  reversed: true,
-}
-let configPower = {
-  id: 'power',
-  title: dict.fields.power[userLang],
-  plotLinesText: dict.fields.avgPower[userLang],
-  plotLinesTextValue: dict.units.w[userLang],
-  colorLine: '#ff6200',
-  reversed: false,
-}
-let configHeartRate = {
-  id: 'hr',
-  title: dict.fields.hr[userLang],
-  plotLinesText: dict.fields.avgHR[userLang],
-  plotLinesTextValue: dict.units.bpm[userLang],
-  colorLine: 'red',
-  reversed: false,
-}
-let configCadenceCycl = {
-  id: 'cadenceCycl',
-  title: dict.fields.cadence[userLang],
-  plotLinesText: dict.fields.avgCadence[userLang],
-  plotLinesTextValue: dict.units.cadenceCycl[userLang],
-  colorLine: 'violet',
-  reversed: false,
-}
-let configCadenceRun = {
-  id: 'cadenceRun',
-  title: dict.fields.cadence[userLang],
-  plotLinesText: dict.fields.avgCadence[userLang],
-  plotLinesTextValue: dict.units.cadenceRun[userLang],
-  colorLine: 'violet',
-  reversed: false,
-}
-let configAltitude = {
-  id: 'altitude',
-  title: dict.fields.altitude[userLang],
-  plotLinesText: dict.fields.avgAltitude[userLang],
-  plotLinesTextValue: dict.units.m[userLang],
-  colorLine: 'green',
-  reversed: false,
-}
+let themeColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--app-color');
+let themeLightBG = getComputedStyle(document.documentElement)
+  .getPropertyValue('--light-grey-bg');
+
 export function addCharts(training, workoutData, map) {
   if (training.isManual || !workoutData) return;
   let recordMesgs = workoutData.recordMesgs;
@@ -79,6 +39,9 @@ export function addCharts(training, workoutData, map) {
   polylinePoints = [];
   marker = {};
   distanceMax = 0;
+  speedAvg = 0;
+  paceAvg = 0;
+  powerAvg = 0;
 
   let smoothing = 4;
   let step = 0;
@@ -88,13 +51,11 @@ export function addCharts(training, workoutData, map) {
   let speedDistanceArray = [];
   let speedMin = 200;
   let speedMax = 0;
-  let speedAvg = 0;
   let avgSpeedSmoothing = 0;
 
   let powerDistanceArray = [];
   let powerMin = 2000;
   let powerMax = 0;
-  let powerAvg = 0;
   let avgPowerSmoothing = 0;
 
   let heartRateDistanceArray = [];
@@ -104,7 +65,9 @@ export function addCharts(training, workoutData, map) {
   let avgHeartRateSmoothing = 0;
 
   let k = 1;
-  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run") k = 2;
+  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run" || training.sport.toLowerCase() === "running") {
+    k = 2
+  };
   let cadenceDistanceArray = [];
   let cadenceMin = 500;
   let cadenceMax = 0;
@@ -118,10 +81,9 @@ export function addCharts(training, workoutData, map) {
   let avgAltitudeSmoothing = 0;
 
   let paceDistanceArray = [];
-  let paceMin = 100;
-  let paceMax = 1;
   let pace = 0;
-  let paceAvg = 0;
+  let paceMin = 100;
+  // let paceMax = 1;
   let avgPaceSmoothing = 0;
 
   for (let i = 0; i < recordMesgs.length; i++) {
@@ -221,14 +183,9 @@ export function addCharts(training, workoutData, map) {
   cadenceAvg = Math.round(cadenceAvg/step);
   altitudeAvg = Math.round(altitudeAvg/step);
   distanceMax = +(recordMesgs[recordMesgs.length - 1].distance / 1000).toFixed(2);
-  paceAvg = paceAvg/(step - 1);
-  // let timeTraining = +(recordMesgs[recordMesgs.length - 1].timestamp - timestampStart) / 60000;
-  // paceAvg = +(timeTraining / distanceMax).toFixed(2);
-  paceMax = paceAvg * 1.3;
-  // console.log(paceAvg, paceMin, paceMax, timeTraining, distanceMax);
-  // console.log(configAltitude, altitudeMin, altitudeMax, altitudeAvg, altitudeDistanceArray)
-  while (Highcharts.charts.length>0) Highcharts.charts.pop(); //очищаем глобальную переменную Highcharts от старых графиков
-  // console.log(Highcharts.charts)
+  paceAvg = +(paceAvg/(step - 1)).toFixed(2);
+  // paceMax = paceAvg * 1.3;
+  while (Highcharts.charts.length > 0) Highcharts.charts.pop(); //очищаем глобальную переменную Highcharts от старых графиков
 
   addChartByValue(configPower, powerAvg, powerDistanceArray, stepTimeArray);
   addChartByValue(configHeartRate, heartRateAvg, heartRateDistanceArray, stepTimeArray);
@@ -241,16 +198,16 @@ export function addCharts(training, workoutData, map) {
     addChartByValue(configSpeed, speedAvg, speedDistanceArray, stepTimeArray);
     addChartByValue(configCadenceCycl, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   }
-  addStatsLive();
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
-  synchronizeMouseOut()
+  addStatsLive();
+  synchronizeMouseOut();
+  addMainInfoAboutTraining(training);
 }
 
 function addChartByValue (config, valueAvg, data, time) {
   if (valueAvg === 0) return;
-  let avgText = '';
+  let avgText = valueAvg;
   { if (config.type) avgText = getMinSec(valueAvg);
-  else avgText = valueAvg.toString().replace('.', ',')
 
     Highcharts.chart(config.id, {
       chart: {
@@ -259,6 +216,25 @@ function addChartByValue (config, valueAvg, data, time) {
         type: 'areaspline',
         // styledMode: true,
         zoomType: 'x',
+        resetZoomButton: {
+          position: {
+            x: 0,
+            y: -40,
+          },
+          theme: {
+            fill: themeLightBG,
+            stroke: 'silver',
+            r: 0,
+            states: {
+              hover: {
+                fill: themeColor,
+                style: {
+                  color: themeLightBG,
+                }
+              }
+            }
+          }
+        },
         panning: true,
         panKey: 'shift',
         events: {
@@ -266,13 +242,14 @@ function addChartByValue (config, valueAvg, data, time) {
         }
       },
       title: {
-        text: config.title,
+        text: '&#9900' + ' ' + config.title,
         align: 'left',
-        x: 0,
-        y: 25,
+        x: - 10,
+        y: 20,
         style: {
           color: config.colorLine,
-          fontWeight: 'bold',
+          fontSize: '1rem',
+          // fontWeight: 'bold',
         },
       },
       legend: {
@@ -286,20 +263,21 @@ function addChartByValue (config, valueAvg, data, time) {
         },
         min: 0,
         max: distanceMax,
-        crosshair: true,
       }],
-      rangeSelector: {
-        enabled: true
-      },
-
       yAxis: [{
         title: {
           text: '',
         },
+        min: 0,
         labels: {
           align: 'left',
           x: 0,
-          y: -2,
+          y: -3,
+          zIndex: 5,
+          style: {
+            color: '#383838',
+            textShadow: 'white 0 0 10px',
+          }
         },
         reversed: config.reversed,
         plotLines: [{
@@ -308,7 +286,7 @@ function addChartByValue (config, valueAvg, data, time) {
           value: valueAvg,
           dashStyle: 'shortdash',
           label: {
-            text: `${config.plotLinesText} ${avgText} ${config.plotLinesTextValue}`, // `${filterKey.avgHeartRate}` + ': ' + `${otherWord.hrm}`, // Content of the label.
+            text: `${config.plotLinesText} ${avgText} ${config.plotLinesTextValue}`,
             align: 'right',
             x: - 15,
             y: 15,
@@ -318,7 +296,7 @@ function addChartByValue (config, valueAvg, data, time) {
               textShadow: 'white 0 0 10px',
             }
           },
-          zIndex: 5
+          zIndex: 4
         }],
       }],
       series: [{
@@ -348,11 +326,11 @@ function addChartByValue (config, valueAvg, data, time) {
       },
       tooltip: {
         enabled: false,
-        formatter:
-          function() {
-            if(config.type) this.y = getMinSec(this.y);
-            return `${this.y.toString().replace('.', ',')} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${dict.units.km[userLang]}`;
-          },
+        // formatter:
+        //   function() {
+        //     if(config.type) this.y = getMinSec(this.y);
+        //     return `${this.y.toString().replace('.', ',')} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${dict.units.km[userLang]}`;
+        //   },
         backgroundColor: {
           linearGradient: [0, 0, 0, 60],
           stops: [
@@ -382,16 +360,7 @@ function synchronizeMouseOut() {
     let indexProcessedXData = Math.round(charts[0].series[0].processedXData.length * (x / 732));
     let value = charts[0].series[0].processedXData[indexProcessedXData]
     let indexSeries0 = charts[0].series[0].xData.findIndex(item => item == value)
-    // let chartsLength = charts[0].series[0].xAxis.series[0].points.length;
-    // let mouse = document.querySelector('.mouse');
-  //   mouse.innerHTML = `
-  //   // x: ${x} </br>
-  //   // index: ${indexSeries0} </br>
-  //   // value: ${value} </br>
-  //   // chartsLength: ${chartsLength} </br>
-  //   // +x + chart.plotLeft - 1 ${+x + charts[0].plotLeft - 1} </br>
-  //   // e.clientX - rect.x - padding ${e.clientX - rect.x}
-  // `;
+
     fillStatsLive(indexSeries0);
     if (polylinePoints[indexSeries0]) {
       marker.setLatLng(polylinePoints[indexSeries0]);
@@ -402,7 +371,7 @@ function synchronizeMouseOut() {
       }
       chart.customCrosshair = chart.renderer.rect(+x + chart.plotLeft - 1, chart.plotTop, 0.5, chart.plotSizeY).attr({
         fill: '#383838',
-        zIndex: 5,
+        zIndex: 1,
       }).add()
       // chart.tooltip.refresh([chart.series[0].points[index]]);
     }
@@ -418,15 +387,13 @@ function synchronizeMouseOver(point) {
     }
     chart.customCrosshair = chart.renderer.rect(point.plotX + chart.plotLeft - 1,chart.plotTop, 0.5, chart.plotSizeY).attr({
       fill: '#383838',
-      zIndex: 5,
+      zIndex: 3,
     }).add()
     // chart.tooltip.refresh([chart.series[0].points[indexSeries0]]);
     fillStatsLive(indexSeries0);
     if (polylinePoints[indexSeries0]) {
       marker.setLatLng(polylinePoints[indexSeries0]);
     }
-    // let pointSpan = document.querySelector('.spanPoint');
-    // pointSpan.innerHTML = point.plotX;
   }
 }
 
@@ -447,80 +414,106 @@ function zooming () {
 }
 
 function addStatsLive () {
-  let statsLive = document.getElementById('statsLive');
+  // let statsLive = document.getElementById('statsLive');
   for (let chart of Highcharts.charts) {
     let name = chart.series[0].name;
-    let div = document.createElement('div');
+    if (name == 'cadenceCycl' || name == 'cadenceRun') name = 'cadence';
+    let div = document.getElementById(`${name + 'Live'}`);
     let span = document.createElement('span');
     if (document.querySelector(`.span${name}`)) continue
+    div.innerHTML = dict.fields[name][userLang];
     span.classList.add('span' + name);
-    div.classList.add('div' + name, 'divStatsLive');
-    div.innerHTML = name + ': ';
     span.innerHTML = '--';
-    statsLive.append(div);
     div.append(span);
+    div.hidden = false;
   }
-  let divDistance = document.createElement('div');
-  let divTime = document.createElement('div');
+  let distanceLive = document.getElementById('distanceLive');
+  let timeLive = document.getElementById('timeLive');
   let spanDistance = document.createElement('span');
   let spanTime = document.createElement('span');
-
-  // let pointSpan = document.createElement('span');
-  // let activeSpan = document.createElement('span');
-  // let mouse = document.createElement('span');
-  // let pointDiv = document.createElement('div');
-  // mouse.classList.add('mouse');
-  // pointDiv.classList.add('divPoint');
-  // pointSpan.classList.add('spanPoint');
-  // activeSpan.classList.add('active');
-  // pointDiv.innerHTML = 'PointX: ';
-  // pointSpan.innerHTML = '--';
-  // activeSpan.innerHTML = active;
-
-
-  divDistance.classList.add('divDistance', 'divStatsLive');
   spanDistance.classList.add('spanDistance');
-  divDistance.innerHTML = 'Distance: ';
+  distanceLive.innerHTML = dict.fields.totalDistance[userLang];
   spanDistance.innerHTML = '--';
-
-  divTime.classList.add('divTime', 'divStatsLive');
   spanTime.classList.add('spanTime');
-  divTime.innerHTML = 'Time: ';
+  timeLive.innerHTML = dict.fields.time[userLang];
   spanTime.innerHTML = '--';
-
-  statsLive.append(divDistance);
-  divDistance.append(spanDistance);
-  statsLive.append(divTime);
-  divTime.append(spanTime);
-
-  // statsLive.append(pointDiv);
-  // pointDiv.append(pointSpan);
-  // pointDiv.after(activeSpan);
-  // pointDiv.after(mouse);
+  spanDistance.style.borderColor = 'orange';
+  spanDistance.style.color = 'orange';
+  spanTime.style.borderColor = 'grey';
+  spanTime.style.color = 'grey';
+  distanceLive.append(spanDistance);
+  timeLive.append(spanTime);
 }
 
 function fillStatsLive (indexSeries0) {
-  // let spanActive = document.querySelector('.active');
-  // spanActive.innerHTML = active
   let spanDistance = document.querySelector('.spanDistance');
   let spanTime = document.querySelector('.spanTime');
   if (Highcharts.charts[0].series[0].xData[indexSeries0]) {
     let value = Highcharts.charts[0].series[0].xData[indexSeries0];
     let sec = Highcharts.charts[0].series[1].xData[indexSeries0];
     spanDistance.innerHTML = value;
-    spanTime.innerHTML = sec;
+    spanTime.innerHTML = getHourMinSec(sec);
   }
-  // console.log(Highcharts.charts[0].series[1].xData, Highcharts.charts[0].series[0].points)
   for (let chart of Highcharts.charts) {
-    if (chart.series[0].yData[indexSeries0]) {
+    let value = chart.series[0].yData[indexSeries0];
+    if (value) {
       let name = chart.series[0].name;
+      if (name == 'cadenceCycl' || name == 'cadenceRun') name = 'cadence';
+      let color = chart.series[0].color;
       let span = document.querySelector(`.span${name}`);
-      span.innerHTML = chart.series[0].yData[indexSeries0];
+      // span.style.borderColor = color;
+      span.style.color = color;
+      if (name == 'pace') value = getMinSec(value);
+      span.innerHTML = value;
     }
   }
 }
 
-
-
-
-
+function addMainInfoAboutTraining(training) {
+  let mainInfo = document.getElementById('mainInfo');
+  // distance
+  let totalDistanceDiv = document.createElement('div');
+  let totalDistanceSpan = document.createElement('span');
+  totalDistanceDiv.innerHTML = distanceMax + ' ' + dict.units.km[userLang];
+  totalDistanceSpan.innerHTML =  dict.fields.totalDistance[userLang];
+  mainInfo.append(totalDistanceDiv);
+  totalDistanceDiv.append(totalDistanceSpan);
+  // time
+  let totalTimeDiv = document.createElement('div');
+  let totalTimeSpan = document.createElement('span');
+  totalTimeDiv.innerHTML = getHourMinSec(training.totalTimerTime);
+  totalTimeSpan.innerHTML = dict.fields.totalElapsedTime[userLang];
+  mainInfo.append(totalTimeDiv);
+  totalTimeDiv.append(totalTimeSpan);
+  // speed || pace
+  let avgSpeedDiv = document.createElement('div');
+  let acgSpeedSpan = document.createElement('span');
+  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run" || training.sport.toLowerCase() === "running") {
+    avgSpeedDiv.innerHTML = getMinSec(paceAvg) + ' ' + dict.units.pace[userLang];
+    acgSpeedSpan.innerHTML = dict.fields.avgPace[userLang];
+  }
+  else {
+    avgSpeedDiv.innerHTML = speedAvg + ' ' + dict.units.kmph[userLang];
+    acgSpeedSpan.innerHTML = dict.fields.avgSpeed[userLang];
+  }
+  mainInfo.append(avgSpeedDiv);
+  avgSpeedDiv.append(acgSpeedSpan);
+  // totalAscent
+  if (training.totalAscent) {
+    let totalAscentDiv = document.createElement('div');
+    let totalAscentSpan = document.createElement('span');
+    totalAscentDiv.innerHTML = training.totalAscent + ' ' + dict.units.m[userLang];
+    totalAscentSpan.innerHTML = dict.fields.totalAscent[userLang];
+    mainInfo.append(totalAscentDiv);
+    totalAscentDiv.append(totalAscentSpan);
+  }
+  // avgPower
+  if (powerAvg) {
+    let avgPowerDiv = document.createElement('div');
+    let avgPowerSpan = document.createElement('span');
+    avgPowerDiv.innerHTML = powerAvg + ' ' + dict.units.w[userLang];
+    avgPowerSpan.innerHTML = dict.fields.avgPower[userLang];
+    mainInfo.append(avgPowerDiv);
+    avgPowerDiv.append(avgPowerSpan);
+  }
+}

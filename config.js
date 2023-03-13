@@ -123,7 +123,7 @@ export const dict = {
     maxAltitude: {ru: 'Макс. высота', en: 'Maximum altitude'},
     avgGrade: {ru: 'Средний градиент', en: 'Average grade'},
     maxPosGrade: {ru: 'Макс. градиент', en: 'Maximum grade'},
-    totalAscent: {ru: 'Набор', en: 'Ascend'},
+    totalAscent: {ru: 'Набор высоты', en: 'Ascend'},
     totalDescent: {ru: 'Спуск', en: 'Descend'},
     sport: {ru: 'Вид занятия', en: 'Sport'},
     power: {ru: 'Мощность', en: 'Power'},
@@ -133,7 +133,8 @@ export const dict = {
     cadence: {ru: 'Каденс', en: 'Cadence'},
     avgCadence: {ru: 'Средний каденс', en: 'Average cadence'},
     pace: {ru: 'Темп', en: 'Pace',},
-    avgPace: {ru: 'Средний темп', en: 'Average Pace',}
+    avgPace: {ru: 'Средний темп', en: 'Average Pace',},
+    time: {ru: 'Время', en: 'Time',},
 
   },
   units: {
@@ -172,3 +173,62 @@ export const dict = {
     trainings: {ru: 'Тренировки'},
   }
 };
+
+//конфиги графиков
+export let configSpeed = {
+  id: 'speed',
+  title: dict.fields.speed[userLang],
+  plotLinesText: dict.fields.avgSpeed[userLang],
+  plotLinesTextValue: dict.units.kmph[userLang],
+  colorLine: '#11a9ed',
+  reversed: false,
+}
+export let configPace = {
+  id: 'pace',
+  title: dict.fields.pace[userLang],
+  plotLinesText: dict.fields.avgPace[userLang],
+  plotLinesTextValue: dict.units.pace[userLang],
+  colorLine: '#11a9ed',
+  type: 'pace',
+  reversed: true,
+}
+export let configPower = {
+  id: 'power',
+  title: dict.fields.power[userLang],
+  plotLinesText: dict.fields.avgPower[userLang],
+  plotLinesTextValue: dict.units.w[userLang],
+  colorLine: '#6bc531',
+  reversed: false,
+}
+export let configHeartRate = {
+  id: 'hr',
+  title: dict.fields.hr[userLang],
+  plotLinesText: dict.fields.avgHR[userLang],
+  plotLinesTextValue: dict.units.bpm[userLang],
+  colorLine: '#ff0035',
+  reversed: false,
+}
+export let configCadenceCycl = {
+  id: 'cadenceCycl',
+  title: dict.fields.cadence[userLang],
+  plotLinesText: dict.fields.avgCadence[userLang],
+  plotLinesTextValue: dict.units.cadenceCycl[userLang],
+  colorLine: '#c74cb1',
+  reversed: false,
+}
+export let configCadenceRun = {
+  id: 'cadenceRun',
+  title: dict.fields.cadence[userLang],
+  plotLinesText: dict.fields.avgCadence[userLang],
+  plotLinesTextValue: dict.units.cadenceRun[userLang],
+  colorLine: 'violet',
+  reversed: false,
+}
+export let configAltitude = {
+  id: 'altitude',
+  title: dict.fields.altitude[userLang],
+  plotLinesText: dict.fields.avgAltitude[userLang],
+  plotLinesTextValue: dict.units.m[userLang],
+  colorLine: '#750bc4',
+  reversed: false,
+}

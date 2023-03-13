@@ -84,3 +84,24 @@ export function getMinSec(minuts) {
     return min + ':' + sec
 }
 
+export function getHourMinSec(timestamp) {
+    let hours = Math.floor(timestamp/3600);
+    let minutes = Math.floor(timestamp/60) - (hours * 60);
+    let seconds = Math.round(timestamp % 60);
+
+    let formatted = '';
+    if (hours)
+        formatted = [
+            hours.toString().padStart(2, '0'),
+            minutes.toString().padStart(2, '0'),
+            seconds.toString().padStart(2, '0'),
+    ].join(':');
+
+    else formatted = [
+        minutes.toString().padStart(2, '0'),
+        seconds.toString().padStart(2, '0'),
+    ].join(':');
+
+    return formatted;
+}
+

@@ -1,7 +1,8 @@
 :root {
   --header-height: 1.6rem;
   --footer-height: 1.6rem;
-  --app-color: #ff6200;
+  /*--app-color: #ff6200;*/
+  --app-color: #2fa65a;
   --app-border-radius: 3px;
 	--light-font: white;
   --light-grey-bg: rgb(240, 240, 240);
@@ -37,6 +38,7 @@ main {
   background-color: var(--app-color);
   color: var(--light-font);
   padding-left: 10%;
+  z-index: 9999; // из-за карты
 }
 
 .app-logo {
@@ -67,7 +69,7 @@ main {
 }
 
 .app-footer {
-	display: flex;
+  display: flex;
   flex-flow: row nowrap;
   align-items: center;
   gap: 1.5rem;
@@ -76,6 +78,7 @@ main {
   height: var(--footer-height);
   background-color: var(--light-grey-bg);
   padding-left: 10%;
+  z-index: 9999;
 }
 
 .button {
@@ -114,12 +117,11 @@ td {
 
 /*TrainingInput style*/
 .form {
-  width: 1200px;
+  max-width: 1200px;
   background: #e1e1e1;
 }
 
 .form-container {
-
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -138,23 +140,66 @@ td {
   display: block;
 }
 
-
 /*стили экрана просмотра тренировки*/
+
+#startPositionTime {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  letter-spacing: 2px
+}
+
+#viewTrainingH2 {
+  font-size: 1.5rem;
+  font-weight: 100;
+  margin: 0 0 1rem 0;
+  letter-spacing: 1px
+}
+
 #viewBox {
 display: grid;
-  gap: 3rem;
+  gap: 2rem;
   grid-template-columns: 2fr 1fr;
   max-width: 1200px;
 }
 
 #stats {
   padding-top: 2rem;
-
 }
 
 #stats > li {
   list-style: none;
 }
 
+#mainInfo {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, 120px);
+  justify-items: start;
+  align-items: start;
+}
+
+#mainInfo > div, .statsLive > span {
+  display: block;
+  font-size: 1.8rem;
+  font-weight: 100;
+}
+
+#mainInfo > div > span, .statsLive {
+  display: block;
+  font-size: 0.8rem;
+}
+
+#statsLive {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: flex-start;
+  gap: 1rem;
+  padding: 0.5rem;
+}
+
+.statsLive > span {
+width: 5rem;
+}
 
 
