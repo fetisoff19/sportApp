@@ -8,6 +8,7 @@ let polylinePoints = [];
 let marker = {};
 let distanceMax = 0;
 let active = false;
+
 let configSpeed = {
   id: 'speed',
   title: dict.fields.speed[userLang],
@@ -82,7 +83,6 @@ export function addCharts(training, workoutData, map) {
   let smoothing = 4;
   let step = 0;
   let avgTimeSmoothing = 0;
-  let distanceArray = [];
   let stepTimeArray = [];
 
   let speedDistanceArray = [];
@@ -243,6 +243,7 @@ export function addCharts(training, workoutData, map) {
   }
   addStatsLive();
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
+  synchronizeMouseOut()
 }
 
 function addChartByValue (config, valueAvg, data, time) {
@@ -333,7 +334,6 @@ function addChartByValue (config, valueAvg, data, time) {
             },
             mouseOut: function () {
               active = false;
-              synchronizeMouseOut()
             }
           }
         },
@@ -367,11 +367,10 @@ function addChartByValue (config, valueAvg, data, time) {
   }
 }
 
-
 function synchronizeMouseOut() {
+  if (active) return;
   let div = document.getElementById('charts-container');
   let width = (+document.querySelector('.highcharts-plot-border').getAttribute('width'))
-  let mouse = document.querySelector('.mouse');
   let rect = div.getBoundingClientRect();
   div.addEventListener('mousemove', (e) => {
     if (active) return;
@@ -380,17 +379,19 @@ function synchronizeMouseOut() {
     let x = (e.clientX - rect.x - padding);
     if (x < 0) x = 0;
     if (x > width) x = width;
-    let chartsLength = charts[0].series[0].xAxis.series[0].points.length;
     let indexProcessedXData = Math.round(charts[0].series[0].processedXData.length * (x / 732));
     let value = charts[0].series[0].processedXData[indexProcessedXData]
-
     let indexSeries0 = charts[0].series[0].xData.findIndex(item => item == value)
-    mouse.innerHTML = `
-    x: ${x} </br> 
-    index: ${indexSeries0} </br> 
-    value: ${value} </br>
-    chartsLength: ${chartsLength} </br>
-  `;
+    // let chartsLength = charts[0].series[0].xAxis.series[0].points.length;
+    // let mouse = document.querySelector('.mouse');
+  //   mouse.innerHTML = `
+  //   // x: ${x} </br>
+  //   // index: ${indexSeries0} </br>
+  //   // value: ${value} </br>
+  //   // chartsLength: ${chartsLength} </br>
+  //   // +x + chart.plotLeft - 1 ${+x + charts[0].plotLeft - 1} </br>
+  //   // e.clientX - rect.x - padding ${e.clientX - rect.x}
+  // `;
     fillStatsLive(indexSeries0);
     if (polylinePoints[indexSeries0]) {
       marker.setLatLng(polylinePoints[indexSeries0]);
@@ -424,8 +425,8 @@ function synchronizeMouseOver(point) {
     if (polylinePoints[indexSeries0]) {
       marker.setLatLng(polylinePoints[indexSeries0]);
     }
-    let pointSpan = document.querySelector('.spanPoint');
-    pointSpan.innerHTML = point.plotX;
+    // let pointSpan = document.querySelector('.spanPoint');
+    // pointSpan.innerHTML = point.plotX;
   }
 }
 
@@ -464,17 +465,17 @@ function addStatsLive () {
   let spanDistance = document.createElement('span');
   let spanTime = document.createElement('span');
 
-  let pointSpan = document.createElement('span');
-  let activeSpan = document.createElement('span');
-  let mouse = document.createElement('span');
-  let pointDiv = document.createElement('div');
-  mouse.classList.add('mouse');
-  pointDiv.classList.add('divPoint');
-  pointSpan.classList.add('spanPoint');
-  activeSpan.classList.add('active');
-  pointDiv.innerHTML = 'PointX: ';
-  pointSpan.innerHTML = '--';
-  activeSpan.innerHTML = active;
+  // let pointSpan = document.createElement('span');
+  // let activeSpan = document.createElement('span');
+  // let mouse = document.createElement('span');
+  // let pointDiv = document.createElement('div');
+  // mouse.classList.add('mouse');
+  // pointDiv.classList.add('divPoint');
+  // pointSpan.classList.add('spanPoint');
+  // activeSpan.classList.add('active');
+  // pointDiv.innerHTML = 'PointX: ';
+  // pointSpan.innerHTML = '--';
+  // activeSpan.innerHTML = active;
 
 
   divDistance.classList.add('divDistance', 'divStatsLive');
@@ -492,15 +493,15 @@ function addStatsLive () {
   statsLive.append(divTime);
   divTime.append(spanTime);
 
-  statsLive.append(pointDiv);
-  pointDiv.append(pointSpan);
-  pointDiv.after(activeSpan);
-  pointDiv.after(mouse);
+  // statsLive.append(pointDiv);
+  // pointDiv.append(pointSpan);
+  // pointDiv.after(activeSpan);
+  // pointDiv.after(mouse);
 }
 
 function fillStatsLive (indexSeries0) {
-  let spanActive = document.querySelector('.active');
-  spanActive.innerHTML = active
+  // let spanActive = document.querySelector('.active');
+  // spanActive.innerHTML = active
   let spanDistance = document.querySelector('.spanDistance');
   let spanTime = document.querySelector('.spanTime');
   if (Highcharts.charts[0].series[0].xData[indexSeries0]) {
