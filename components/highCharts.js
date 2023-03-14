@@ -187,21 +187,21 @@ export function addCharts(training, workoutData, map) {
   // paceMax = paceAvg * 1.3;
   while (Highcharts.charts.length > 0) Highcharts.charts.pop(); //очищаем глобальную переменную Highcharts от старых графиков
 
+
+// важен порядок запуска функций для правильного формирования порядка Highcharts.charts для ф-ии addAxesLabel
+  if (k == 2) addChartByValue(configPace, paceAvg, paceDistanceArray, stepTimeArray);
+  else addChartByValue(configSpeed, speedAvg, speedDistanceArray, stepTimeArray)
   addChartByValue(configPower, powerAvg, powerDistanceArray, stepTimeArray);
   addChartByValue(configHeartRate, heartRateAvg, heartRateDistanceArray, stepTimeArray);
+  if (k == 2) addChartByValue(configCadenceCycl, cadenceAvg, cadenceDistanceArray, stepTimeArray);
+  else addChartByValue(configCadenceRun, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   addChartByValue(configAltitude, altitudeAvg, altitudeDistanceArray, stepTimeArray);
-  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "running") {
-    addChartByValue(configPace, paceAvg, paceDistanceArray, stepTimeArray);
-    addChartByValue(configCadenceRun, cadenceAvg, cadenceDistanceArray, stepTimeArray);
-  }
-  else {
-    addChartByValue(configSpeed, speedAvg, speedDistanceArray, stepTimeArray);
-    addChartByValue(configCadenceCycl, cadenceAvg, cadenceDistanceArray, stepTimeArray);
-  }
+
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
   addStatsLive();
   synchronizeMouseOut();
   addMainInfoAboutTraining(training);
+  addAxesLabel ();
 }
 
 function addChartByValue (config, valueAvg, data, time) {
@@ -245,7 +245,7 @@ function addChartByValue (config, valueAvg, data, time) {
         text: '&#9900' + ' ' + config.title,
         align: 'left',
         x: - 10,
-        y: 20,
+        y: 30,
         style: {
           color: config.colorLine,
           fontSize: '1rem',
@@ -256,23 +256,22 @@ function addChartByValue (config, valueAvg, data, time) {
         enabled: false,
       },
       xAxis: [{
+        tickWidth: 0,
         labels: {
-          formatter: function () {
-            return this.value + dict.units.km[userLang];
-          },
+          enabled: false,
         },
         min: 0,
         max: distanceMax,
       }],
       yAxis: [{
         title: {
-          text: '',
+          enabled: false,
         },
         min: 0,
         labels: {
           align: 'left',
           x: 0,
-          y: -3,
+          y: 12,
           zIndex: 5,
           style: {
             color: '#383838',
@@ -326,11 +325,6 @@ function addChartByValue (config, valueAvg, data, time) {
       },
       tooltip: {
         enabled: false,
-        // formatter:
-        //   function() {
-        //     if(config.type) this.y = getMinSec(this.y);
-        //     return `${this.y.toString().replace('.', ',')} ${config.plotLinesTextValue}<br/>${this.x.toString().replace('.', ',')} ${dict.units.km[userLang]}`;
-        //   },
         backgroundColor: {
           linearGradient: [0, 0, 0, 60],
           stops: [
@@ -343,6 +337,63 @@ function addChartByValue (config, valueAvg, data, time) {
       },
     });
   }
+}
+
+function addAxesLabel (){
+  let topChart = Highcharts.charts[0];
+  let topChartName = topChart.series[0].name;
+  let topChartOptions = {
+    opposite: true,
+    tickWidth: 0,
+    minorTickPosition: 'inside',
+    showFirstLabel: false,
+    labels: {
+      formatter: function () {
+        return this.value + dict.units.km[userLang];
+      },
+      enabled: true,
+      y: 25,
+    },
+    min: 0,
+    max: distanceMax,
+  }
+  let bottomChart = Highcharts.charts[Highcharts.charts.length - 1];
+  let bottomChartName = bottomChart.series[0].name;
+  let bottomChartOptions = {
+    tickWidth: 0,
+    showFirstLabel: false,
+    labels: {
+      formatter: function () {
+        return this.value + dict.units.km[userLang];
+      },
+      enabled: true,
+      y: 12,
+    },
+    min: 0,
+    max: distanceMax,
+  };
+  switch (topChartName) {
+    case 'pace':
+    case 'speed':
+      topChart.xAxis[0].update(topChartOptions);
+      break;
+    case 'power':
+      topChart.xAxis[0].update(topChartOptions);
+      break;
+    case 'hr':
+      topChart.xAxis[0].update(topChartOptions);
+      break;
+  }
+  if (Highcharts.charts.length < 4) return;
+    switch (bottomChartName) {
+      case 'altitude':
+        bottomChart.xAxis[0].update(bottomChartOptions);
+        break;
+      case 'cadenceCycl':
+      case 'cadenceRun':
+        bottomChart.xAxis[0].update(bottomChartOptions);
+        break;
+    }
 }
 
 function synchronizeMouseOut() {

@@ -221,7 +221,7 @@ export let configCadenceRun = {
   title: dict.fields.cadence[userLang],
   plotLinesText: dict.fields.avgCadence[userLang],
   plotLinesTextValue: dict.units.cadenceRun[userLang],
-  colorLine: 'violet',
+  colorLine: '#c74cb1',
   reversed: false,
 }
 export let configAltitude = {

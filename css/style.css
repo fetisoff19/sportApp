@@ -205,4 +205,9 @@ display: grid;
 width: 5rem;
 }
 
+/*#map {*/
+/*  position: sticky;*/
+/*  top: var(--header-height);*/
+/*}*/
+
 
