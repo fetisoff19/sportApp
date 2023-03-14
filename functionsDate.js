@@ -85,23 +85,30 @@ export function getMinSec(minuts) {
 }
 
 export function getHourMinSec(timestamp) {
-    let hours = Math.floor(timestamp/3600);
-    let minutes = Math.floor(timestamp/60) - (hours * 60);
-    let seconds = Math.round(timestamp % 60);
+    if (typeof timestamp == "number" || typeof timestamp == "string") {
+        let hours = Math.floor(timestamp / 3600);
+        let minutes = Math.floor(timestamp / 60) - (hours * 60);
+        let seconds = Math.round(timestamp % 60);
 
-    let formatted = '';
-    if (hours)
-        formatted = [
-            hours.toString().padStart(2, '0'),
+        let formatted = '';
+        if (hours)
+            formatted = [
+                hours.toString().padStart(2, '0'),
+                minutes.toString().padStart(2, '0'),
+                seconds.toString().padStart(2, '0'),
+            ].join(':');
+
+        else formatted = [
             minutes.toString().padStart(2, '0'),
             seconds.toString().padStart(2, '0'),
-    ].join(':');
-
-    else formatted = [
-        minutes.toString().padStart(2, '0'),
-        seconds.toString().padStart(2, '0'),
-    ].join(':');
-
-    return formatted;
+        ].join(':');
+        return formatted;
+    }
+    if (typeof timestamp == "object") {
+        return timestamp.toLocaleTimeString('it-IT');
+    }
 }
 
+export let convertSpeed = value =>  +(value * 3.6).toFixed(1);
+export let convertPace = value => getMinSec((60/(3.6 * value)).toFixed(2));
+export let doubleValue = value =>  Math.round(value * 2)

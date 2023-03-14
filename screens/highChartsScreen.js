@@ -1,11 +1,20 @@
 import { Screen } from './Screen.js';
 import {addCharts} from "../components/highCharts.js";
 import {db} from "../db.js";
-import {dict, userLang} from "../config.js";
+import {
+  dict,
+  fieldsAltitudeArray, fieldsCadenceCyclArray, fieldsCadenceRunArray,
+  fieldsHRArray, fieldsOtherArray, fieldsPaceArray,
+  fieldsPowerArray,
+  fieldsSpeedArray, fieldsTemperatureArray, fieldsTimeArray,
+  userLang
+} from "../config.js";
 import {createMapWithWorkoutRoute} from "../components/maps.js";
+import {convertPace, convertSpeed, doubleValue, getHourMinSec} from "../functionsDate.js";
+import {BlockStatsComponent} from "../components/formComponent.js";
 
 const page = `
-<div id="viewBox">
+<div id="viewTrainingPage">
   <div id="charts-container">
     <div id="statsLive">
       <div id="speedLive" class="statsLive" hidden></div>
@@ -27,10 +36,11 @@ const page = `
   </div>
   <div>
     <div id="map"></div>
-    <div id="startPositionTime"></div>
-    <p id="viewTrainingH2"></p>
+    <div id="sportStartTime"></div>
+    <p id="paraNameTraining"></p>
     <div id="mainInfo"></div>
-    <span id="stats"></span>
+    <p id="paraStats"></p>
+    <div id="stats"></div>
   </div>
 </div>
 `
@@ -45,46 +55,62 @@ export const highChartsScreen = new Screen({
 async function startHighChartsScreen(options) {
   let workoutId = options.urlParams.workoutId;
   let training = await db.get('workouts', +workoutId);
-  addBarStartPositionTime (training);
+  addSportStartTime (training);
   if (training.isManual) {
     addStats (training);
     return;
   };
-  let viewTrainingH2 = document.getElementById('viewTrainingH2');
+
+  let para = document.getElementById('paraNameTraining');
   let mapElem = document.getElementById('map')
-  viewTrainingH2.innerText = training.name;
+  para.innerText = training.name;
 
   db.get('workoutsData', +training.id).then(workoutData => {
-    let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, 400);
+    let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, );
     addCharts(training, workoutData, map);
-    addStats (training, workoutData);
+    if (workoutData.sessionMesgs[0])
+    addStats (workoutData.sessionMesgs[0]);
   });
 }
 
-function addStats (training, workoutData) {
-  let stats = document.getElementById('stats');
-  let ul = document.createElement('ul');
-  stats.after(ul);
-
-  if (workoutData) {
-    for (let message in workoutData.sessionMesgs[0]) {
-      let li = document.createElement('li');
-      li.innerHTML = message + ': ' + workoutData.sessionMesgs[0][message];
-      ul.after(li)
-    }
-  } else for (let message in training) {
-    let li = document.createElement('li');
-    li.innerHTML = message + ': ' + training[message];
-    ul.after(li)
-  }
-}
-
-function addBarStartPositionTime (training) {
-  let startPositionTime = document.getElementById('startPositionTime');
+function addSportStartTime (training) {
+  let sportStartTime = document.getElementById('sportStartTime');
   let address = '';
   // if (polylinePoints[0]) address = polylinePoints[0]; // чуть позже сделать
-  startPositionTime.innerHTML = training.sport + ', '
+  sportStartTime.innerHTML = training.sport + ', '
     + training.startTime.toLocaleString() + ' ' + address;
 }
+
+function addStats (obj) {
+  let stats = document.getElementById('stats');
+  let para = document.getElementById('paraStats')
+  para.innerHTML = dict.title.stats[userLang];
+  // stats.after(ul);
+
+  let blockHR = new BlockStatsComponent(obj, 'hr', fieldsHRArray, 'bpm', Math.round);
+  let blockCadenceRun = new BlockStatsComponent(obj, 'cadence', fieldsCadenceRunArray, 'cadenceRun', doubleValue);
+  let blockCadenceCycl = new BlockStatsComponent(obj, 'cadence', fieldsCadenceCyclArray, 'cadenceCycl', Math.round);
+  let blockPower = new BlockStatsComponent(obj, 'power', fieldsPowerArray, 'w', Math.round);
+  let blockSpeed = new BlockStatsComponent(obj, 'speed', fieldsSpeedArray, 'kmph', convertSpeed);
+  let blockPace = new BlockStatsComponent(obj, 'pace', fieldsPaceArray, 'pace', convertPace);
+  let blockAltitude = new BlockStatsComponent(obj, 'altitude', fieldsAltitudeArray, 'm', Math.round);
+  let blockTemperature = new BlockStatsComponent(obj, 'temperature', fieldsTemperatureArray, 'degreeCelsius', Math.round);
+  let blockOther = new BlockStatsComponent(obj, 'other', fieldsOtherArray, '');
+  let blockTime = new BlockStatsComponent(obj,'time', fieldsTimeArray, '', getHourMinSec)
+  stats.append(blockHR.statBlock, blockCadenceCycl.statBlock, blockCadenceRun.statBlock, blockPower.statBlock, blockSpeed.statBlock, blockPace.statBlock, blockAltitude.statBlock,
+    blockTemperature.statBlock, blockTime.statBlock, blockOther.statBlock);
+  blockHR.removeEmptyElem();
+  blockCadenceCycl.removeEmptyElem();
+  blockCadenceRun.removeEmptyElem();
+  blockPower.removeEmptyElem();
+  blockSpeed.removeEmptyElem();
+  blockPace.removeEmptyElem()
+  blockAltitude.removeEmptyElem();
+  blockTemperature.removeEmptyElem();
+  blockOther.removeEmptyElem();
+  blockTime.removeEmptyElem();
+};
+
+
 
 

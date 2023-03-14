@@ -108,7 +108,7 @@ let fields = {
 export const dict = {
   fields: {
     timestamp: {ru: 'Окончание занятия', en: 'Workout end'},
-    startTime: {ru: 'Дата', en: 'Date'},
+    startTime: {ru: 'Начало занятия', en: 'Date'},
     totalElapsedTime: {ru: 'Продолжительность', en: 'Duration'},
     totalTimerTime: {ru: 'Время в движении', en: 'Moving time'},
     totalDistance: {ru: 'Дистанция', en: 'Distance'},
@@ -128,14 +128,28 @@ export const dict = {
     sport: {ru: 'Вид занятия', en: 'Sport'},
     power: {ru: 'Мощность', en: 'Power'},
     avgPower: {ru: 'Средняя мощность', en: 'Average power'},
+    maxPower: {ru: 'Макс. мощность', en: 'Maximum power'},
+    normalizedPower:  {ru: 'Нормализованная мощность', en: 'Normalized power',},
     hr: {ru: 'Пульс', en: 'Heart rate'},
-    avgHR: {ru: 'Средний пульс', en: 'Average HR'},
+    minHeartRate: {ru: 'Мин. пульс', en: 'Minimum HR'},
+    avgHeartRate: {ru: 'Средний пульс', en: 'Average HR'},
+    maxHeartRate: {ru: 'Макс. пульс', en: 'Maximum HR'},
     cadence: {ru: 'Каденс', en: 'Cadence'},
     avgCadence: {ru: 'Средний каденс', en: 'Average cadence'},
+    maxCadence: {ru: 'Макс. каденс', en: 'Average cadence'},
+    avgRunningCadence: {ru: 'Средний каденс', en: 'Average cadence'},
+    maxRunningCadence: {ru: 'Макс. каденс', en: 'Maximum cadence'},
     pace: {ru: 'Темп', en: 'Pace',},
-    avgPace: {ru: 'Средний темп', en: 'Average Pace',},
+    avgPace: {ru: 'Средний темп', en: 'Average pace',},
+    enhancedMaxSpeed: {ru: 'Макс. темп', en: 'Maximum pace',},
+    enhancedAvgSpeed: {ru: 'Средний темп', en: 'Average pace',},
     time: {ru: 'Время', en: 'Time',},
-
+    trainingStressScore: {ru: 'TSS®', en: 'TSS®',},
+    leftRightBalance: {ru: 'Баланс', en: 'Balance',},
+    maxTemperature: {ru: 'Макс. температура', en: 'Maximum temperature',},
+    avgTemperature: {ru: 'Средняя температура', en: 'Average temperature',},
+    temperature: {ru: 'Температура', en: 'Temperature',},
+    other: {ru: 'Другое', en: 'Other',},
   },
   units: {
     s: {ru: 'Секунды', en: 'Seconds'},
@@ -143,12 +157,12 @@ export const dict = {
     km: {ru: 'км', en: 'km'},
     mps: {ru: 'Метры в секунду', en: 'Meters per second'},
     kmph: {ru: 'км/ч', en: 'km/h'},
-    bpm: {ru: 'уд./мин', en: 'Beats per minute'},
+    bpm: {ru: 'уд/мин', en: 'Beats per minute'},
     w: {ru: 'Вт', en: 'W'},
-    cadenceCycl: {ru: 'об./мин.', en: 'rpm'},
-    cadenceRun: {ru: 'шаг./мин.', en: 'spm'},
+    cadenceCycl: {ru: 'об/мин', en: 'rpm'},
+    cadenceRun: {ru: 'шаг/мин', en: 'spm'},
     pace: {ru: '/км', en: '/km'},
-
+    degreeCelsius: {ru: '°C', en: '°C'},
   },
   sports: {
     cycling: {ru: 'Велоспорт', en: 'Cycling'},
@@ -171,6 +185,7 @@ export const dict = {
   title: {
     viewTraining: {ru: 'Просмотр тренировки'},
     trainings: {ru: 'Тренировки'},
+    stats: {ru: 'Статистика', en: 'stats'}
   }
 };
 
@@ -203,7 +218,7 @@ export let configPower = {
 export let configHeartRate = {
   id: 'hr',
   title: dict.fields.hr[userLang],
-  plotLinesText: dict.fields.avgHR[userLang],
+  plotLinesText: dict.fields.avgHeartRate[userLang],
   plotLinesTextValue: dict.units.bpm[userLang],
   colorLine: '#ff0035',
   reversed: false,
@@ -232,3 +247,118 @@ export let configAltitude = {
   colorLine: '#750bc4',
   reversed: false,
 }
+export let fieldsTimeArray = [
+  'totalTimerTime',
+  'totalElapsedTime',
+  'timestamp',
+  'startTime',
+];
+
+export let fieldsCadenceCyclArray = [
+  'maxCadence',
+  'avgCadence',
+];
+
+export let fieldsCadenceRunArray = [
+  'maxRunningCadence',
+  'avgRunningCadence',
+];
+
+export let fieldsSpeedArray = [
+  'maxSpeed',
+  'avgSpeed',
+];
+
+export let fieldsPaceArray = [
+  'enhancedMaxSpeed',
+  'enhancedAvgSpeed',
+];
+
+export let fieldsHRArray = [
+  'maxHeartRate',
+  'avgHeartRate',
+  'minHeartRate',
+];
+
+export let fieldsTemperatureArray = [
+  'maxTemperature',
+  'avgTemperature',
+];
+
+export let fieldsAltitudeArray = [
+  'totalAscent',
+  'totalDescent',
+  'maxAltitude',
+  'minAltitude',
+];
+
+export let fieldsPowerArray = [
+  'maxPower',
+  'normalizedPower',
+  'avgPower',
+];
+
+export let fieldsOtherArray = [
+  'totalStrides',
+  'trainingStressScore',
+  'totalCalories',
+  // 'leftRightBalance',
+];
+
+let fieldsArray = [
+  'startTime',
+  'timestamp',
+  'totalElapsedTime',
+  'totalTimerTime',
+
+  'totalStrides',
+  'totalDistance',
+
+  'totalCalories',
+  'trainingStressScore',
+
+  'avgSpeed',
+  'maxSpeed',
+
+  'avgPower',
+  'maxPower',
+  'normalizedPower',
+
+  'leftRightBalance',
+
+  'totalAscent',
+  'totalDescent',
+  'maxAltitude',
+  'minAltitude',
+
+  'avgRunningCadence',
+  'maxRunningCadence',
+  'avgCadence',
+  'maxCadence',
+
+  'avgTemperature',
+  'maxTemperature',
+
+  'minHeartRate',
+  'avgHeartRate',
+  'maxHeartRate',
+
+  // 'sport',
+  // 'firstLapIndex',
+  // 'numLaps',
+  // 'trigger',
+  // 'subSport',
+  // 'avgLeftTorqueEffectiveness',
+  // 'avgRightTorqueEffectiveness',
+  // 'avgLeftPedalSmoothness',
+  // 'avgRightPedalSmoothness',
+  // 'enhancedAvgSpeed',
+  // 'enhancedMaxSpeed',
+  // 'enhancedMaxAltitude',
+  // 'enhancedMinAltitude',
+  // 'startPositionLat',
+  // 'startPositionLong',
+  // 'totalWork',
+  // 'timeInHrZone',
+  // 'timeInPowerZone',
+]

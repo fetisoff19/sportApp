@@ -189,13 +189,13 @@ export function addCharts(training, workoutData, map) {
 
 
 // важен порядок запуска функций для правильного формирования порядка Highcharts.charts для ф-ии addAxesLabel
-  if (k == 2) addChartByValue(configPace, paceAvg, paceDistanceArray, stepTimeArray);
-  else addChartByValue(configSpeed, speedAvg, speedDistanceArray, stepTimeArray)
-  addChartByValue(configPower, powerAvg, powerDistanceArray, stepTimeArray);
-  addChartByValue(configHeartRate, heartRateAvg, heartRateDistanceArray, stepTimeArray);
-  if (k == 2) addChartByValue(configCadenceCycl, cadenceAvg, cadenceDistanceArray, stepTimeArray);
-  else addChartByValue(configCadenceRun, cadenceAvg, cadenceDistanceArray, stepTimeArray);
-  addChartByValue(configAltitude, altitudeAvg, altitudeDistanceArray, stepTimeArray);
+  if (k == 2) addChartByValue(configPace, paceMin, paceAvg, paceDistanceArray, stepTimeArray);
+  else addChartByValue(configSpeed, speedMin, speedAvg, speedDistanceArray, stepTimeArray)
+  addChartByValue(configPower, powerMin, powerAvg, powerDistanceArray, stepTimeArray);
+  addChartByValue(configHeartRate, heartRateMin, heartRateAvg, heartRateDistanceArray, stepTimeArray);
+  if (k == 2) addChartByValue(configCadenceCycl, cadenceMin, cadenceAvg, cadenceDistanceArray, stepTimeArray);
+  else addChartByValue(configCadenceRun, cadenceMin, cadenceAvg, cadenceDistanceArray, stepTimeArray);
+  addChartByValue(configAltitude, altitudeMin, altitudeAvg, altitudeDistanceArray, stepTimeArray);
 
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
   addStatsLive();
@@ -204,7 +204,7 @@ export function addCharts(training, workoutData, map) {
   addAxesLabel ();
 }
 
-function addChartByValue (config, valueAvg, data, time) {
+function addChartByValue (config, valueMin, valueAvg, data, time) {
   if (valueAvg === 0) return;
   let avgText = valueAvg;
   { if (config.type) avgText = getMinSec(valueAvg);
@@ -224,7 +224,6 @@ function addChartByValue (config, valueAvg, data, time) {
           theme: {
             fill: themeLightBG,
             stroke: 'silver',
-            r: 0,
             states: {
               hover: {
                 fill: themeColor,
@@ -249,7 +248,6 @@ function addChartByValue (config, valueAvg, data, time) {
         style: {
           color: config.colorLine,
           fontSize: '1rem',
-          // fontWeight: 'bold',
         },
       },
       legend: {
@@ -267,7 +265,7 @@ function addChartByValue (config, valueAvg, data, time) {
         title: {
           enabled: false,
         },
-        min: 0,
+        min: valueMin,
         labels: {
           align: 'left',
           x: 0,
@@ -287,7 +285,7 @@ function addChartByValue (config, valueAvg, data, time) {
           label: {
             text: `${config.plotLinesText} ${avgText} ${config.plotLinesTextValue}`,
             align: 'right',
-            x: - 15,
+            x: - 5,
             y: 15,
             style:{
               fontWeight: 'bold',
