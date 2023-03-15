@@ -7,7 +7,7 @@ import {
   fieldsSpeedArray, fieldsTemperatureArray, fieldsTimeArray, userLang
 } from "../config.js";
 import {createMapWithWorkoutRoute} from "../components/maps.js";
-import {convertPace, convertSpeed, doubleValue, getHourMinSec} from "../functionsDate.js";
+import {convertPace, convertSpeed, doubleValue, getHourMinSec, getMinSec} from "../functionsDate.js";
 import {BlockStatsComponent} from "../components/formComponent.js";
 
 const page = `
@@ -52,20 +52,21 @@ export const highChartsScreen = new Screen({
 async function startHighChartsScreen(options) {
   let workoutId = options.urlParams.workoutId;
   let training = await db.get('workouts', +workoutId);
+  let para = document.getElementById('paraNameTraining');
+  para.innerText = training.name;
   addSportStartTime (training);
+
   if (training.isManual) {
-    addStats (training);
+    addMainInfoAboutTraining(training);
     return;
   };
 
-  let para = document.getElementById('paraNameTraining');
   let mapElem = document.getElementById('map')
-  para.innerText = training.name;
-
   db.get('workoutsData', +training.id).then(workoutData => {
     let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, );
-    addCharts(training, workoutData, map);
+    addCharts(workoutData, map);
     if (workoutData.sessionMesgs[0])
+    addMainInfoAboutTraining(workoutData.sessionMesgs[0]);
     addStats (workoutData.sessionMesgs[0]);
   });
 }
@@ -73,16 +74,79 @@ async function startHighChartsScreen(options) {
 function addSportStartTime (training) {
   let sportStartTime = document.getElementById('sportStartTime');
   let address = '';
-  // if (polylinePoints[0]) address = polylinePoints[0]; // чуть позже сделать
-  sportStartTime.innerHTML = training.sport + ', '
+  let sport = '';
+  if (dict.sports[training.sport]) sport = dict.sports[training.sport][userLang];
+  else sport = training.sport
+  sportStartTime.innerHTML = sport + ', '
     + training.startTime.toLocaleString() + ' ' + address;
+}
+
+function addMainInfoAboutTraining(training) {
+  let mainInfo = document.getElementById('mainInfo');
+  // distance
+  if (training.totalDistance) {
+    let totalDistanceDiv = document.createElement('div');
+    let totalDistanceSpan = document.createElement('span');
+    totalDistanceDiv.innerHTML = (training.totalDistance / 1000).toFixed(2) + ' ' + dict.units.km[userLang];
+    totalDistanceSpan.innerHTML = dict.fields.totalDistance[userLang];
+    mainInfo.append(totalDistanceDiv);
+    totalDistanceDiv.append(totalDistanceSpan);
+  }
+  // time
+  if (training.totalTimerTime) {
+    let totalTimeDiv = document.createElement('div');
+    let totalTimeSpan = document.createElement('span');
+    totalTimeDiv.innerHTML = getHourMinSec(training.totalTimerTime);
+    totalTimeSpan.innerHTML = dict.fields.totalElapsedTime[userLang];
+    mainInfo.append(totalTimeDiv);
+    totalTimeDiv.append(totalTimeSpan);
+  }
+  // speed || pace
+  let avgSpeed = 0;
+  let avgPace = 0;
+  if (training.avgSpeed) avgSpeed = convertSpeed(training.avgSpeed);
+  if (training.enhancedAvgSpeed) avgPace = convertPace(training.enhancedAvgSpeed);
+  if (training.isManual) {
+    avgSpeed = convertSpeed(training.totalDistance / training.totalTimerTime);
+    avgPace = convertPace(training.totalDistance / training.totalTimerTime);
+  };
+  {
+    let avgSpeedDiv = document.createElement('div');
+    let acgSpeedSpan = document.createElement('span');
+    if (training.sport === 'running') {
+      avgSpeedDiv.innerHTML = avgPace + ' ' + dict.units.pace[userLang];
+      acgSpeedSpan.innerHTML = dict.fields.avgPace[userLang];
+    } else {
+      avgSpeedDiv.innerHTML = avgSpeed + ' ' + dict.units.kmph[userLang];
+      acgSpeedSpan.innerHTML = dict.fields.avgSpeed[userLang];
+    }
+    mainInfo.append(avgSpeedDiv);
+    avgSpeedDiv.append(acgSpeedSpan);
+  }
+  // totalAscent
+  if (training.totalAscent) {
+    let totalAscentDiv = document.createElement('div');
+    let totalAscentSpan = document.createElement('span');
+    totalAscentDiv.innerHTML =  Math.round(training.totalAscent) + ' ' + dict.units.m[userLang];
+    totalAscentSpan.innerHTML = dict.fields.totalAscent[userLang];
+    mainInfo.append(totalAscentDiv);
+    totalAscentDiv.append(totalAscentSpan);
+  }
+  // avgPower
+  if (training.avgPower) {
+    let avgPowerDiv = document.createElement('div');
+    let avgPowerSpan = document.createElement('span');
+    avgPowerDiv.innerHTML = Math.round(training.avgPower) + ' ' + dict.units.w[userLang];
+    avgPowerSpan.innerHTML = dict.fields.avgPower[userLang];
+    mainInfo.append(avgPowerDiv);
+    avgPowerDiv.append(avgPowerSpan);
+  }
 }
 
 function addStats (obj) {
   let stats = document.getElementById('stats');
   let para = document.getElementById('paraStats')
   para.innerHTML = dict.title.stats[userLang];
-  // stats.after(ul);
 
   let blockHR = new BlockStatsComponent(obj, 'hr', fieldsHRArray, 'bpm', Math.round);
   let blockCadenceRun = new BlockStatsComponent(obj, 'cadence', fieldsCadenceRunArray, 'cadenceRun', doubleValue);

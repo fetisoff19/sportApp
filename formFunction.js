@@ -29,7 +29,7 @@ export function openCreateForm () {
     {size: 10, placeholder: otherWord.placeholderDistance},
     changeTextToDistance)
 
-  let totalElapsedTime = new DivLabelInput('totalElapsedTime')
+  let totalElapsedTime = new DivLabelInput('totalTimerTime')
   totalElapsedTime.setLabelText(filterKey.totalElapsedTime);
   totalElapsedTime.setInputTime(20, '01:00');
 
@@ -88,7 +88,7 @@ export function saveForm(e, id){
     if (key === 'totalDistance') {
       obj[key] = input.value * 1000
     }
-    else if (key === 'totalElapsedTime') {
+    else if (key === 'totalTimerTime') {
       obj[key] = changeInputTimeToSeconds(input.value)
     } else if (key === 'startTime') {
       obj[key] = new Date(input.value)

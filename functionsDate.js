@@ -111,4 +111,5 @@ export function getHourMinSec(timestamp) {
 
 export let convertSpeed = value =>  +(value * 3.6).toFixed(1);
 export let convertPace = value => getMinSec((60/(3.6 * value)).toFixed(2));
+export let convertPaceInMinute = value => +(60/(3.6 * value)).toFixed(2);
 export let doubleValue = value =>  Math.round(value * 2)

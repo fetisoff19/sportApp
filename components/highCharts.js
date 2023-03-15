@@ -10,24 +10,21 @@ import {
   dict,
   userLang
 } from "../config.js";
-import {getHourMinSec, getMinSec} from "../functionsDate.js";
+import {convertPace, convertPaceInMinute, convertSpeed, getHourMinSec, getMinSec} from "../functionsDate.js";
 import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
 
 let polylinePoints = [];
 let marker = {};
 let distanceMax = 0;
 let active = false;
-let speedAvg = 0;
-let paceAvg = 0;
-let powerAvg = 0;
 
 let themeColor = getComputedStyle(document.documentElement)
   .getPropertyValue('--app-color');
 let themeLightBG = getComputedStyle(document.documentElement)
   .getPropertyValue('--light-grey-bg');
 
-export function addCharts(training, workoutData, map) {
-  if (training.isManual || !workoutData) return;
+export function addCharts(workoutData, map) {
+  if (!workoutData) return;
   let recordMesgs = workoutData.recordMesgs;
   if (isNaN(recordMesgs[recordMesgs.length - 1].heartRate)
     && isNaN(recordMesgs[recordMesgs.length - 1].heartRate)
@@ -39,51 +36,64 @@ export function addCharts(training, workoutData, map) {
   polylinePoints = [];
   marker = {};
   distanceMax = 0;
-  speedAvg = 0;
-  paceAvg = 0;
-  powerAvg = 0;
 
   let smoothing = 4;
   let step = 0;
   let avgTimeSmoothing = 0;
   let stepTimeArray = [];
 
+  let speedAvg = 0;
+  if (workoutData.sessionMesgs[0].avgSpeed) {
+    speedAvg = convertSpeed(workoutData.sessionMesgs[0].avgSpeed);
+  }
   let speedDistanceArray = [];
   let speedMin = 200;
   let speedMax = 0;
   let avgSpeedSmoothing = 0;
 
+  let powerAvg = 0;
+  if (workoutData.sessionMesgs[0].avgPower) {
+    powerAvg = Math.round(workoutData.sessionMesgs[0].avgPower);
+  }
   let powerDistanceArray = [];
   let powerMin = 2000;
   let powerMax = 0;
   let avgPowerSmoothing = 0;
 
+  let heartRateAvg = 0;
+  if (workoutData.sessionMesgs[0].avgHeartRate) {
+    heartRateAvg = Math.round(workoutData.sessionMesgs[0].avgHeartRate);
+  }
   let heartRateDistanceArray = [];
   let heartRateMin = 250;
   let heartRateMax = 0;
-  let heartRateAvg = 0;
   let avgHeartRateSmoothing = 0;
 
   let k = 1;
-  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run" || training.sport.toLowerCase() === "running") {
-    k = 2
+  if (workoutData.sessionMesgs[0].sport == 'running') {
+    k = 2;
   };
+
+  let cadenceAvg = 0;
+  if (workoutData.sessionMesgs[0].avgCadence) {
+    cadenceAvg = Math.round(workoutData.sessionMesgs[0].avgCadence) * k;
+  }
   let cadenceDistanceArray = [];
   let cadenceMin = 500;
   let cadenceMax = 0;
-  let cadenceAvg = 0;
   let avgCadenceSmoothing = 0;
 
+  let altitudeAvg = 0;
   let altitudeDistanceArray = [];
   let altitudeMin = 8000;
   let altitudeMax = 0;
-  let altitudeAvg = 0;
   let avgAltitudeSmoothing = 0;
 
+  let paceAvg = 0;
+  if (workoutData.sessionMesgs[0].enhancedAvgSpeed) {
+    paceAvg = convertPaceInMinute(workoutData.sessionMesgs[0].enhancedAvgSpeed);
+  }
   let paceDistanceArray = [];
-  let pace = 0;
-  let paceMin = 100;
-  // let paceMax = 1;
   let avgPaceSmoothing = 0;
 
   for (let i = 0; i < recordMesgs.length; i++) {
@@ -92,6 +102,7 @@ export function addCharts(training, workoutData, map) {
 
     let distance = +(recordMesgs[i].distance / 1000).toFixed(2); // км
     let speed = +(recordMesgs[i].speed * 3.6).toFixed(1); // км/ч
+    let pace = 0;
     let power = recordMesgs[i].power; // Вт
     let heartRate = recordMesgs[i].heartRate;
     let cadence = recordMesgs[i].cadence * k;
@@ -101,43 +112,38 @@ export function addCharts(training, workoutData, map) {
     if (isNaN(power)) power = 0;
     if (isNaN(heartRate)) heartRate = 0;
     if (isNaN(cadence)) cadence = 0;
-    if (isNaN(altitude)) altitude = altitudeAvg/step;
 
     avgSpeedSmoothing += speed;
     speedMin = Math.min(speedMin, speed);
     speedMax = Math.max(speedMax, speed);
-    speedAvg += speed;
 
     avgPowerSmoothing += power;
     powerMin = Math.min(powerMin, power);
     powerMax = Math.max(powerMax, power);
-    powerAvg += power;
 
     avgHeartRateSmoothing += heartRate;
     heartRateMin = Math.min(heartRateMin, heartRate);
     heartRateMax = Math.max(heartRateMax, heartRate);
-    heartRateAvg += heartRate;
 
-    if (k === 2 && cadence === 0) cadence = cadenceAvg/step // при беге каденс не может быть равен 0
+    if (k === 2 && cadence === 0) cadence = cadenceAvg // при беге каденс не может быть равен 0
     avgCadenceSmoothing += cadence;
     cadenceMin = Math.min(cadenceMin, cadence);
     cadenceMax = Math.max(cadenceMax, cadence);
-    cadenceAvg += cadence;
 
-    if(altitude > 6000 || altitude < -300) altitude = altitudeAvg/step; // отсеиваем брак в данных
+    if(isNaN(altitude) || altitude > 6000 || altitude < -300) altitude = altitudeAvg/step; // отсеиваем брак в данных
     avgAltitudeSmoothing += altitude;
     altitudeMin = Math.min(altitudeMin, altitude);
     altitudeMax = Math.max(altitudeMax, altitude);
     altitudeAvg += altitude;
 
-    if (i > 0){
-      let stepTime = (recordMesgs[i].timestamp - recordMesgs[i - 1].timestamp) / 1000  ;  // получаем время в секундах между соседними элементами массива
-      let stepDistance = (recordMesgs[i].distance - recordMesgs[i - 1].distance) / 1000; // получаем расстояние в км между соседними элементами массива
-      pace = +(stepTime / (stepDistance * 60)); // получаем мин/км
-      if (pace > 12 || pace < 1.5) pace = paceAvg/step; // отсеиваем брак в данных
-      paceMin = Math.min(paceMin, pace);
-      avgPaceSmoothing += pace;
-      paceAvg += pace;
+    if (recordMesgs[i].enhancedSpeed) {
+      pace = convertPaceInMinute(recordMesgs[i].enhancedSpeed)
+    } // получаем мин/км
+    if (isNaN(pace) || pace > 12 || pace < 1.5) pace = paceAvg; // отсеиваем брак в данных
+    avgPaceSmoothing += pace;
+
+    if (i > 0) {
+      let stepTime = (recordMesgs[i].timestamp - recordMesgs[i - 1].timestamp) / 1000;  // получаем время в секундах между соседними элементами массива
       avgTimeSmoothing += stepTime;
     }
 
@@ -177,19 +183,12 @@ export function addCharts(training, workoutData, map) {
     console.log(step)
     return
   };
-  heartRateAvg = Math.round(heartRateAvg/step);
-  speedAvg = +(speedAvg/step).toFixed(1);
-  powerAvg = Math.round(powerAvg/step);
-  cadenceAvg = Math.round(cadenceAvg/step);
   altitudeAvg = Math.round(altitudeAvg/step);
   distanceMax = +(recordMesgs[recordMesgs.length - 1].distance / 1000).toFixed(2);
-  paceAvg = +(paceAvg/(step - 1)).toFixed(2);
-  // paceMax = paceAvg * 1.3;
   while (Highcharts.charts.length > 0) Highcharts.charts.pop(); //очищаем глобальную переменную Highcharts от старых графиков
 
-
 // важен порядок запуска функций для правильного формирования порядка Highcharts.charts для ф-ии addAxesLabel
-  if (k == 2) addChartByValue(configPace, paceMin, paceAvg, paceDistanceArray, stepTimeArray);
+  if (k == 2) addChartByValue(configPace, 2, paceAvg, paceDistanceArray, stepTimeArray);
   else addChartByValue(configSpeed, speedMin, speedAvg, speedDistanceArray, stepTimeArray)
   addChartByValue(configPower, powerMin, powerAvg, powerDistanceArray, stepTimeArray);
   addChartByValue(configHeartRate, heartRateMin, heartRateAvg, heartRateDistanceArray, stepTimeArray);
@@ -200,15 +199,13 @@ export function addCharts(training, workoutData, map) {
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
   addStatsLive();
   synchronizeMouseOut();
-  addMainInfoAboutTraining(training);
   addAxesLabel ();
 }
 
 function addChartByValue (config, valueMin, valueAvg, data, time) {
-  if (valueAvg === 0) return;
+  if (valueAvg === 0 || isNaN(valueAvg)) return;
   let avgText = valueAvg;
   { if (config.type) avgText = getMinSec(valueAvg);
-
     Highcharts.chart(config.id, {
       chart: {
         height: 200,
@@ -515,54 +512,5 @@ function fillStatsLive (indexSeries0) {
       if (name == 'pace') value = getMinSec(value);
       span.innerHTML = value;
     }
-  }
-}
-
-function addMainInfoAboutTraining(training) {
-  let mainInfo = document.getElementById('mainInfo');
-  // distance
-  let totalDistanceDiv = document.createElement('div');
-  let totalDistanceSpan = document.createElement('span');
-  totalDistanceDiv.innerHTML = distanceMax + ' ' + dict.units.km[userLang];
-  totalDistanceSpan.innerHTML =  dict.fields.totalDistance[userLang];
-  mainInfo.append(totalDistanceDiv);
-  totalDistanceDiv.append(totalDistanceSpan);
-  // time
-  let totalTimeDiv = document.createElement('div');
-  let totalTimeSpan = document.createElement('span');
-  totalTimeDiv.innerHTML = getHourMinSec(training.totalTimerTime);
-  totalTimeSpan.innerHTML = dict.fields.totalElapsedTime[userLang];
-  mainInfo.append(totalTimeDiv);
-  totalTimeDiv.append(totalTimeSpan);
-  // speed || pace
-  let avgSpeedDiv = document.createElement('div');
-  let acgSpeedSpan = document.createElement('span');
-  if (training.sport.toLowerCase() === "бег" || training.sport.toLowerCase() === "run" || training.sport.toLowerCase() === "running") {
-    avgSpeedDiv.innerHTML = getMinSec(paceAvg) + ' ' + dict.units.pace[userLang];
-    acgSpeedSpan.innerHTML = dict.fields.avgPace[userLang];
-  }
-  else {
-    avgSpeedDiv.innerHTML = speedAvg + ' ' + dict.units.kmph[userLang];
-    acgSpeedSpan.innerHTML = dict.fields.avgSpeed[userLang];
-  }
-  mainInfo.append(avgSpeedDiv);
-  avgSpeedDiv.append(acgSpeedSpan);
-  // totalAscent
-  if (training.totalAscent) {
-    let totalAscentDiv = document.createElement('div');
-    let totalAscentSpan = document.createElement('span');
-    totalAscentDiv.innerHTML = training.totalAscent + ' ' + dict.units.m[userLang];
-    totalAscentSpan.innerHTML = dict.fields.totalAscent[userLang];
-    mainInfo.append(totalAscentDiv);
-    totalAscentDiv.append(totalAscentSpan);
-  }
-  // avgPower
-  if (powerAvg) {
-    let avgPowerDiv = document.createElement('div');
-    let avgPowerSpan = document.createElement('span');
-    avgPowerDiv.innerHTML = powerAvg + ' ' + dict.units.w[userLang];
-    avgPowerSpan.innerHTML = dict.fields.avgPower[userLang];
-    mainInfo.append(avgPowerDiv);
-    avgPowerDiv.append(avgPowerSpan);
   }
 }
