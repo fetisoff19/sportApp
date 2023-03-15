@@ -2,12 +2,9 @@ import { Screen } from './Screen.js';
 import {addCharts} from "../components/highCharts.js";
 import {db} from "../db.js";
 import {
-  dict,
-  fieldsAltitudeArray, fieldsCadenceCyclArray, fieldsCadenceRunArray,
-  fieldsHRArray, fieldsOtherArray, fieldsPaceArray,
-  fieldsPowerArray,
-  fieldsSpeedArray, fieldsTemperatureArray, fieldsTimeArray,
-  userLang
+  dict, fieldsAltitudeArray, fieldsCadenceCyclArray, fieldsCadenceRunArray,
+  fieldsHRArray, fieldsOtherArray, fieldsPaceArray, fieldsPowerArray,
+  fieldsSpeedArray, fieldsTemperatureArray, fieldsTimeArray, userLang
 } from "../config.js";
 import {createMapWithWorkoutRoute} from "../components/maps.js";
 import {convertPace, convertSpeed, doubleValue, getHourMinSec} from "../functionsDate.js";
@@ -96,19 +93,19 @@ function addStats (obj) {
   let blockAltitude = new BlockStatsComponent(obj, 'altitude', fieldsAltitudeArray, 'm', Math.round);
   let blockTemperature = new BlockStatsComponent(obj, 'temperature', fieldsTemperatureArray, 'degreeCelsius', Math.round);
   let blockOther = new BlockStatsComponent(obj, 'other', fieldsOtherArray, '');
-  let blockTime = new BlockStatsComponent(obj,'time', fieldsTimeArray, '', getHourMinSec)
+  let blockTime = new BlockStatsComponent(obj,'time', fieldsTimeArray, '', getHourMinSec);
   stats.append(blockHR.statBlock, blockCadenceCycl.statBlock, blockCadenceRun.statBlock, blockPower.statBlock, blockSpeed.statBlock, blockPace.statBlock, blockAltitude.statBlock,
     blockTemperature.statBlock, blockTime.statBlock, blockOther.statBlock);
-  blockHR.removeEmptyElem();
-  blockCadenceCycl.removeEmptyElem();
-  blockCadenceRun.removeEmptyElem();
-  blockPower.removeEmptyElem();
-  blockSpeed.removeEmptyElem();
-  blockPace.removeEmptyElem()
-  blockAltitude.removeEmptyElem();
-  blockTemperature.removeEmptyElem();
-  blockOther.removeEmptyElem();
-  blockTime.removeEmptyElem();
+  blockHR.removeEmptyOrConflictElem();
+  blockCadenceCycl.removeEmptyOrConflictElem('running');
+  blockCadenceRun.removeEmptyOrConflictElem('cycling');
+  blockPower.removeEmptyOrConflictElem();
+  blockSpeed.removeEmptyOrConflictElem('running');
+  blockPace.removeEmptyOrConflictElem('cycling');
+  blockAltitude.removeEmptyOrConflictElem();
+  blockTemperature.removeEmptyOrConflictElem();
+  blockOther.removeEmptyOrConflictElem();
+  blockTime.removeEmptyOrConflictElem();
 };
 
 

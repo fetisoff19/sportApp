@@ -39,55 +39,39 @@ export class FormComponent {
 
 export class BlockStatsComponent {
   constructor(obj, name, fields, unit, f) {
-    console.log(dict.units['bpm'][userLang], dict.units['cadenceRun'][userLang],
-      dict.units['cadenceCycl'][userLang] ,dict.units['w'][userLang],dict.units['kmph'][userLang],
-      dict.units['pace'][userLang],dict.units['m'][userLang],dict.units['degreeCelsius'][userLang],)
+    let sport = obj.sport;
     let statBlock = document.createElement('div');
     let h3 = document.createElement('h4');
     let value = '';
+    let measure = '';
+    if (!unit || !dict.units[unit]) measure = '';
+    else measure = dict.units[unit][userLang];
     statBlock.append(h3);
     statBlock.classList.add('statBlock');
     h3.innerHTML = dict.fields[name][userLang];
     for (let field of fields) {
-      if ((obj.sport.toLowerCase() === "бег"
-        || obj.sport.toLowerCase() === "run"
-        || obj.sport.toLowerCase() === "running") && (name == 'speed')) continue;
-      if ((obj.sport.toLowerCase() === "велоспорт"
-        || obj.sport.toLowerCase() === "шоссейный велоспорт"
-        || obj.sport.toLowerCase() === "cycling") && name == 'pace') continue;
-      if ((obj.sport.toLowerCase() === "бег"
-        || obj.sport.toLowerCase() === "run"
-        || obj.sport.toLowerCase() === "running") && unit == 'cadenceCycl') continue;
-      if ((obj.sport.toLowerCase() === "велоспорт"
-        || obj.sport.toLowerCase() === "шоссейный велоспорт"
-        || obj.sport.toLowerCase() === "cycling") && unit == 'cadenceRun') continue;
-
-
-      // else unit = dict.units[unit][userLang];
       if (obj[field]) {
         value = obj[field];
         if (f) value = f(value);
-        console.log(value, unit, name );
-        if (!unit || dict.units[unit][userLang]) unit = '';
         let div = document.createElement('div');
         let span = document.createElement('span');
-        div.innerHTML = value + ' ' + unit;
+        div.innerHTML = value + ' ' + measure;
         span.innerHTML = dict.fields[field][userLang];
         h3.after(div);
-        div.append(span)
-      };
+        div.append(span);
+      }
     }
 
     this.statBlock = statBlock;
-    this.value = value;
     this.h3 = h3;
-
+    this.sport = sport;
   }
-
-  removeEmptyElem(){
-    if (!this.h3.nextSibling) {
-      this.h3.parentElement.remove()
+  // если элемент пуст или конфликтует с другим, удаляем его
+  removeEmptyOrConflictElem(sport) {
+    if (!this.h3.nextSibling || this.sport == sport) {
+      this.statBlock.remove()
     }
   }
+
 }
 
