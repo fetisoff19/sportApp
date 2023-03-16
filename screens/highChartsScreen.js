@@ -30,6 +30,7 @@ const page = `
     <div id="cadenceCycl" class="charts" ></div>
     <div id="cadenceRun" class="charts" ></div>
     <div id="altitude" class="charts" ></div>
+
   </div>
   <div>
     <div id="map"></div>
@@ -40,6 +41,7 @@ const page = `
     <div id="stats"></div>
   </div>
 </div>
+<div id="powerCurve" class="charts" ></div>
 `
 
 export const highChartsScreen = new Screen({
@@ -51,20 +53,20 @@ export const highChartsScreen = new Screen({
 
 async function startHighChartsScreen(options) {
   let workoutId = options.urlParams.workoutId;
-  let training = await db.get('workouts', +workoutId);
+  let workout = await db.get('workouts', +workoutId);
   let para = document.getElementById('paraNameTraining');
-  para.innerText = training.name;
-  addSportStartTime (training);
+  para.innerText = workout.name;
+  addSportStartTime (workout);
 
-  if (training.isManual) {
-    addMainInfoAboutTraining(training);
+  if (workout.isManual) {
+    addMainInfoAboutTraining(workout);
     return;
   };
 
   let mapElem = document.getElementById('map')
-  db.get('workoutsData', +training.id).then(workoutData => {
+  db.get('workoutsData', +workout.id).then(workoutData => {
     let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, );
-    addCharts(workoutData, map);
+    addCharts(workoutData, workout, map);
     if (workoutData.sessionMesgs[0])
     addMainInfoAboutTraining(workoutData.sessionMesgs[0]);
     addStats (workoutData.sessionMesgs[0]);

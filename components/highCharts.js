@@ -5,13 +5,14 @@ import {
   configCadenceRun,
   configHeartRate,
   configPace,
-  configPower,
+  configPower, configPowerCurve,
   configSpeed,
   dict,
   userLang
 } from "../config.js";
-import {convertPace, convertPaceInMinute, convertSpeed, getHourMinSec, getMinSec} from "../functionsDate.js";
+import {convertPaceInMinute, convertSpeed, getHourMinSec, getMinSec} from "../functionsDate.js";
 import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
+import {timePeriod} from "../screens/stats.js";
 
 let polylinePoints = [];
 let marker = {};
@@ -23,7 +24,7 @@ let themeColor = getComputedStyle(document.documentElement)
 let themeLightBG = getComputedStyle(document.documentElement)
   .getPropertyValue('--light-grey-bg');
 
-export function addCharts(workoutData, map) {
+export function addCharts(workoutData, workout, map) {
   if (!workoutData) return;
   let recordMesgs = workoutData.recordMesgs;
   if (isNaN(recordMesgs[recordMesgs.length - 1].heartRate)
@@ -194,6 +195,18 @@ export function addCharts(workoutData, map) {
   addChartByValue(configHeartRate, heartRateMin, heartRateAvg, heartRateDistanceArray, stepTimeArray);
   if (k == 2) addChartByValue(configCadenceCycl, cadenceMin, cadenceAvg, cadenceDistanceArray, stepTimeArray);
   else addChartByValue(configCadenceRun, cadenceMin, cadenceAvg, cadenceDistanceArray, stepTimeArray);
+
+  if (workout.powerCurve) {
+    let powerCurveArray = [];
+    let firstValue = 0;
+    for (let item of workout.powerCurve) {
+      powerCurveArray.push(item);
+      firstValue = item[0];
+    }
+    addChartByValue(configPowerCurve, 0, - 100, powerCurveArray,'');
+    addOptionsForPowerCurveChart(firstValue);
+  };
+
   addChartByValue(configAltitude, altitudeMin, altitudeAvg, altitudeDistanceArray, stepTimeArray);
 
   if (polylinePoints.length*smoothing/step > 0.8 && map) marker = L.marker(polylinePoints[0]).addTo(map);
@@ -392,6 +405,7 @@ function addAxesLabel (){
 }
 
 function synchronizeMouseOut() {
+
   if (active) return;
   let div = document.getElementById('charts-container');
   let width = (+document.querySelector('.highcharts-plot-border').getAttribute('width'))
@@ -412,6 +426,7 @@ function synchronizeMouseOut() {
       marker.setLatLng(polylinePoints[indexSeries0]);
     }
     for (let chart of charts) {
+      if (chart.series[0].name == 'powerCurve') continue;
       if (chart.customCrosshair) {
         chart.customCrosshair.element.remove();
       }
@@ -427,6 +442,7 @@ function synchronizeMouseOut() {
 function synchronizeMouseOver(point) {
   active = true;
   for (let chart of Highcharts.charts) {
+    if (chart.series[0].name == 'powerCurve') continue;
     let indexSeries0 = chart.series[0].xData.findIndex(item => item === point.category);
     if (chart.customCrosshair) {
       chart.customCrosshair.element.remove();
@@ -445,11 +461,13 @@ function synchronizeMouseOver(point) {
 
 function zooming () {
   Highcharts.charts.forEach(chart => {
+    if (chart.series[0].name !== 'powerCurve')
     chart.xAxis[0].update({
       events: {
         afterSetExtremes: function (event) {
           Highcharts.charts.forEach(otherChart => {
             if (otherChart.xAxis[0].min != event.min || otherChart.xAxis[0].max != event.max) {
+              if (otherChart.series[0].name !== 'powerCurve')
               otherChart.xAxis[0].setExtremes(event.min, event.max)
             }
           })
@@ -462,11 +480,12 @@ function zooming () {
 function addStatsLive () {
   // let statsLive = document.getElementById('statsLive');
   for (let chart of Highcharts.charts) {
+    if (chart.series[0].name == 'powerCurve') continue;
     let name = chart.series[0].name;
     if (name == 'cadenceCycl' || name == 'cadenceRun') name = 'cadence';
     let div = document.getElementById(`${name + 'Live'}`);
     let span = document.createElement('span');
-    if (document.querySelector(`.span${name}`)) continue
+    if (document.querySelector(`.span${name}`)) continue;
     div.innerHTML = dict.fields[name][userLang];
     span.classList.add('span' + name);
     span.innerHTML = '--';
@@ -501,6 +520,7 @@ function fillStatsLive (indexSeries0) {
     spanTime.innerHTML = getHourMinSec(sec);
   }
   for (let chart of Highcharts.charts) {
+    if (chart.series[0].name !== 'powerCurve');
     let value = chart.series[0].yData[indexSeries0];
     if (value) {
       let name = chart.series[0].name;
@@ -511,6 +531,66 @@ function fillStatsLive (indexSeries0) {
       span.style.color = color;
       if (name == 'pace') value = getMinSec(value);
       span.innerHTML = value;
+    }
+  }
+}
+
+function addOptionsForPowerCurveChart (maxValueX) {
+  let options = {
+    chart: {
+      height: 500,
+    },
+    xAxis:{
+      tickWidth: 1,
+      tickPositions: timePeriod,
+      minorTickPosition: 'outside',
+      showFirstLabel: true,
+      labels: {
+      formatter: function () {
+        if (this.value < 60) return this.value + dict.units.s[userLang];
+        else return getHourMinSec(this.value)
+      },
+      enabled: true,
+        y: 25,
+    },
+      min: 1,
+      max: maxValueX,
+    },
+    yAxis:{
+      showFirstLabel: false,
+    },
+    tooltip: {
+      enabled: true,
+      formatter: function () {
+        let x = this.x;
+        if (x < 60) return `${x}${dict.units.s[userLang]}<br>${this.y} ${dict.units.w[userLang]}`
+        else
+        {
+          x = getHourMinSec(this.x)
+          return `${x}<br>${this.y}${dict.units.w[userLang]}`;
+        }
+
+      },
+      backgroundColor: {
+        linearGradient: [0, 0, 0, 60],
+        stops: [
+          [0, '#FFFFFF'],
+          [1, '#E0E0E0']
+        ]
+      },
+      borderWidth: 1,
+      borderColor: '#AAA'
+    },
+    plotOptions: {
+      series: {
+        relativeXValue: true,
+      }
+    },
+
+  }
+  for (let chart of Highcharts.charts) {
+    if (chart.series[0].name == 'powerCurve') {
+      chart.update(options)
     }
   }
 }

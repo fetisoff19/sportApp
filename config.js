@@ -152,7 +152,8 @@ export const dict = {
     other: {ru: 'Другое', en: 'Other',},
   },
   units: {
-    s: {ru: 'Секунды', en: 'Seconds'},
+    seconds: {ru: 'Секунды', en: 'Seconds'},
+    s: {ru: 'с', en: 's'},
     m: {ru: 'м', en: 'm'},
     km: {ru: 'км', en: 'km'},
     mps: {ru: 'Метры в секунду', en: 'Meters per second'},
@@ -185,7 +186,8 @@ export const dict = {
   title: {
     viewTraining: {ru: 'Просмотр тренировки'},
     trainings: {ru: 'Тренировки'},
-    stats: {ru: 'Статистика', en: 'stats'}
+    stats: {ru: 'Статистика', en: 'stats'},
+    powerCurve: {ru: 'Кривая мощности', en: 'Power curve'},
   }
 };
 
@@ -247,6 +249,16 @@ export let configAltitude = {
   colorLine: '#750bc4',
   reversed: false,
 }
+
+export let configPowerCurve = {
+  id: 'powerCurve',
+  title: dict.title.powerCurve[userLang],
+  plotLinesText: '',
+  plotLinesTextValue: dict.units.w[userLang],
+  colorLine: '#02afaf',
+  reversed: false,
+}
+
 export let fieldsTimeArray = [
   'totalTimerTime',
   'totalElapsedTime',
