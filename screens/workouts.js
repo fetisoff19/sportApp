@@ -8,8 +8,6 @@ import {openView} from "../viewTraining.js";
 import {openCreateForm, openEditForm} from "../formFunction.js";
 import {dict as dist, userLang} from "../config.js";
 
-let workouts = {}; // вынесено в отдельный файл
-
 const workoutsScreenHtml = `
   <label for="fit-to-json-file-inp">FIT TO JSON</label>
   <input type="file" id="fit-to-json-file-inp" accept=".fit">
@@ -77,7 +75,7 @@ function workoutsStart(startOptions) {
 }
 
 async function fillWorkoutsTable(startOptions) {
-  workouts = await db.getAll('workouts');
+  let workouts = await db.getAll('workouts');
   workouts.forEach(rec=> addRowToWorkoutsTable(rec, startOptions));
 }
 

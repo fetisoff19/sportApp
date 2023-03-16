@@ -171,7 +171,3 @@ function addStats (obj) {
   blockOther.removeEmptyOrConflictElem();
   blockTime.removeEmptyOrConflictElem();
 };
-
-
-
-
