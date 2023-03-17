@@ -148,7 +148,6 @@ function del(e) {
 }
 
 export function openHighcharts(e, startOptions) {
-  console.log(startOptions)
   let workoutId = 0;
   let hcOptions = {
     ...startOptions,

@@ -21,12 +21,12 @@ export const statsScreen = new Screen({
   html: page,
 });
 
-async function startStatsScreen() {
+async function startStatsScreen(startOptions) {
   console.time('db')
   let workouts = await db.getAll('workouts');
   // console.log(workouts);
   let powerCurveMap = getPointForPowerCurve(workouts);
-  addPowerCurveChart (powerCurveMap, configPowerCurveAllTime)
+  addPowerCurveChart (powerCurveMap, configPowerCurveAllTime, startOptions)
   console.timeEnd('db');
 }
 
@@ -50,7 +50,7 @@ function getPointForPowerCurve(allWorkouts){
   return powerCurveMap;
 }
 
-function addPowerCurveChart (powerCurveMap, config) {
+function addPowerCurveChart (powerCurveMap, config, startOptions) {
   let powerCurveArray = [];
   for (let item of powerCurveMap) {
     if (Number.isInteger(item[0]) && Number.isInteger(item[1].value))
@@ -155,7 +155,8 @@ function addPowerCurveChart (powerCurveMap, config) {
           events: {
             click: function () {
               let id = powerCurveMap.get(this.x).id;
-              openHighcharts(id);
+              openHighcharts(id, startOptions)
+              // openHighcharts(id);
               // location.href = 'https://en.wikipedia.org/wiki/' +
               //   this.options.key;
             }
