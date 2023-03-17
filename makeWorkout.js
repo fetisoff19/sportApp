@@ -74,21 +74,37 @@ let timePeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
 ];
 
 function searchMaxValue(arr, obj, sport, unit) {
-
     if (obj.sessionMesgs[0].sport === sport && obj.recordMesgs[0][unit]) {
+        let maxPowerFor1Second = 0;
+        if (obj.sessionMesgs[0].maxPower) maxPowerFor1Second = obj.sessionMesgs[0].maxPower;
         let data = obj.recordMesgs;
+        let timestamp = 1;
+        if (data[0].timestamp)
+            timestamp = Math.round((data[1].timestamp - data[0].timestamp) / 1000);
+        arr.forEach(item => item * timestamp);
+        // let periodBetweenStep = 1;
         let result = new Map(); // здесь будем хранить сумму наибольших значений за промежуток времени
-        let partialSum = {} // здесь будем хранить сумму значений на данном этапе итерации
+        let partialSum = {1: 0,} // здесь будем хранить сумму значений на данном этапе итерации
+        result.set(1, maxPowerFor1Second);
         for (let item of arr) {
+            if (item == 1) continue;
             if (Number.isInteger(item) && item > 0)
                 if (item > data.length) continue;
             result.set(item, 0);
             partialSum[item] = 0;
         }
+
+        console.log(maxPowerFor1Second)
         for (let i = 0; i < data.length; i++) {
             if (isNaN(data[i][unit])) continue;
+            if (i > 0)
+            // periodBetweenStep = Math.round((data[i].timestamp - data[i - 1].timestamp) / 1000);// обнуляем счётчик partialSum
             for (let item of arr) {
                 if (item <= data.length) {
+                    // if ((periodBetweenStep - timestamp) / item > 0.2) { // если пауза была больше 20%, то сбрасываем partialSum[item]
+                    //     console.log (periodBetweenStep, item, i)
+                    //     partialSum[item] = 0;
+                    // }
                     let previousValue = 0;
                     if (i < item) {
                         partialSum[item] = partialSum[item] + data[i][unit];

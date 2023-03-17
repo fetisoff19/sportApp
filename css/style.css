@@ -236,7 +236,11 @@ td {
   width: 1200px;
 }
 
+/*страница stats*/
 
+#powerStats {
+  width: 1200px;
+}
 
 
 /*#map {*/

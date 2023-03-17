@@ -259,6 +259,15 @@ export let configPowerCurve = {
   reversed: false,
 }
 
+export let configPowerCurveAllTime = {
+  id: 'allTimePowerCurve',
+  title: dict.title.powerCurve[userLang],
+  plotLinesText: '',
+  plotLinesTextValue: dict.units.w[userLang],
+  colorLine: '#2fa65a',
+  reversed: false,
+}
+
 export let fieldsTimeArray = [
   'totalTimerTime',
   'totalElapsedTime',

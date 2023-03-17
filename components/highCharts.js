@@ -19,9 +19,9 @@ let marker = {};
 let distanceMax = 0;
 let active = false;
 
-let themeColor = getComputedStyle(document.documentElement)
+export let themeColor = getComputedStyle(document.documentElement)
   .getPropertyValue('--app-color');
-let themeLightBG = getComputedStyle(document.documentElement)
+export let themeLightBG = getComputedStyle(document.documentElement)
   .getPropertyValue('--light-grey-bg');
 
 export function addCharts(workoutData, workout, map) {
@@ -198,13 +198,13 @@ export function addCharts(workoutData, workout, map) {
 
   if (workout.powerCurve) {
     let powerCurveArray = [];
-    let firstValue = 0;
+    let lastValue = 0;
     for (let item of workout.powerCurve) {
       powerCurveArray.push(item);
-      firstValue = item[0];
+      lastValue = item[0];
     }
     addChartByValue(configPowerCurve, 0, - 100, powerCurveArray,'');
-    addOptionsForPowerCurveChart(firstValue);
+    addOptionsForPowerCurveChart(lastValue);
   };
 
   addChartByValue(configAltitude, altitudeMin, altitudeAvg, altitudeDistanceArray, stepTimeArray);
@@ -405,7 +405,6 @@ function addAxesLabel (){
 }
 
 function synchronizeMouseOut() {
-
   if (active) return;
   let div = document.getElementById('charts-container');
   let width = (+document.querySelector('.highcharts-plot-border').getAttribute('width'))

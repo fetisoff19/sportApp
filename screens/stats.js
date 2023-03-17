@@ -1,21 +1,220 @@
 import {Screen} from "./Screen.js";
-import {dict as dist, dict, userLang} from "../config.js";
+import {configPowerCurveAllTime, dict as dist, dict, userLang} from "../config.js";
 import {db} from "../db.js";
+import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
+import {themeColor, themeLightBG} from "../components/highCharts.js";
+import {getHourMinSec} from "../functionsDate.js";
+import {openHighcharts} from "./workouts.js";
 
 const page = `
 <div id="powerStats">
-    <div id="powerCurve"></div> 
+    <div id="allTimePowerCurve"></div> 
     <div id="powerTopStats"></div> 
 </div>
 `
 
 export const statsScreen = new Screen({
   name: 'startStatsScreen',
-  // navName: dist.title.stats[userLang],
+  navName: dist.title.stats[userLang],
   title: dict.title.stats[userLang],
   start: startStatsScreen,
   html: page,
 });
+
+async function startStatsScreen() {
+  console.time('db')
+  let workouts = await db.getAll('workouts');
+  // console.log(workouts);
+  let powerCurveMap = getPointForPowerCurve(workouts);
+  addPowerCurveChart (powerCurveMap, configPowerCurveAllTime)
+  console.timeEnd('db');
+}
+
+function getPointForPowerCurve(allWorkouts){
+  let powerCurveMap = new Map();
+  allWorkouts.forEach(workout => {
+    if ( workout.sport == 'cycling' && workout.powerCurve) {
+      for (let item of workout.powerCurve) {
+        if (isNaN(item[0]) || isNaN(item[1])) continue;
+        if (powerCurveMap.has(item[0])) {
+          if (item[1] > powerCurveMap.get(item[0]).value) {
+            powerCurveMap.set(item[0], {value: item[1], id: workout.id, timestamp: workout.timestamp,});
+          }
+        }
+        else {
+          powerCurveMap.set(item[0], {value: item[1], id: workout.id, timestamp: workout.timestamp, });
+        }
+      }
+    }
+  })
+  return powerCurveMap;
+}
+
+function addPowerCurveChart (powerCurveMap, config) {
+  let powerCurveArray = [];
+  for (let item of powerCurveMap) {
+    if (Number.isInteger(item[0]) && Number.isInteger(item[1].value))
+      powerCurveArray.push([item[0], item[1].value])
+  }
+  // console.log(powerCurveArray)
+  let chart = new Highcharts.chart(config.id, {
+    chart: {
+      height: 600,
+      spacingTop: 0,
+      type: 'areaspline',
+      zoomType: 'x',
+      resetZoomButton: {
+        position: {
+          x: 0,
+          y: -40,
+        },
+        theme: {
+          fill: themeLightBG,
+          stroke: 'silver',
+          states: {
+            hover: {
+              fill: themeColor,
+              style: {
+                color: themeLightBG,
+              }
+            }
+          }
+        }
+      },
+      panning: true,
+      panKey: 'shift',
+    },
+    title: {
+      text: '&#9900' + ' ' + config.title,
+      align: 'left',
+      x: - 10,
+      y: 30,
+      style: {
+        color: config.colorLine,
+        fontSize: '1rem',
+      },
+    },
+    legend: {
+      enabled: false,
+    },
+    xAxis: [{
+      tickWidth: 1,
+      // tickPositions: timePeriod,
+      // tickPositions: [1, 2, 5, 10, 20, 30, 60, 120, 300, 6000, 1200, 1800, 3600, 7200, 18000,],
+      tickPixelInterval: 10,
+      minorTickPosition: 'outside',
+      showFirstLabel: true,
+      labels: {
+        formatter: function () {
+          if (this.value < 60) return this.value + dict.units.s[userLang];
+          else return getHourMinSec(this.value)
+        },
+        enabled: true,
+        y: 25,
+      },
+      min: 1,
+      max: (powerCurveArray[powerCurveArray.length - 1][0] + 100),
+      crosshair: true,
+    }],
+    yAxis: [{
+      min: 0,
+      max: powerCurveArray[0][1],
+      showFirstLabel: false,
+      title: {
+        enabled: false,
+      },
+      labels: {
+        // align: 'left',
+        // x: 0,
+        // y: 12,
+        zIndex: 5,
+        style: {
+          color: '#383838',
+          textShadow: 'white 0 0 10px',
+        }
+      },
+    }],
+    series: [{
+      data: powerCurveArray,
+      name: config.id,
+      color: config.colorLine,
+      lineWidth: 1,
+      marker: { radius: 1 },
+      point: {
+        events: {
+        }
+      },
+    }],
+    plotOptions: {
+      areaspline: {
+        fillOpacity: 1,
+      },
+      series: {
+        cursor: 'pointer',
+        point: {
+          events: {
+            click: function () {
+              let id = powerCurveMap.get(this.x).id;
+              openHighcharts(id);
+              // location.href = 'https://en.wikipedia.org/wiki/' +
+              //   this.options.key;
+            }
+          }
+        }
+      }
+    },
+    tooltip: {
+      event: '',
+      enabled: true,
+      formatter: function () {
+        // let id = powerCurveMap.get(this.x).id;
+        let text = powerCurveMap.get(this.x).timestamp.toLocaleDateString();
+        let x = this.x;
+        if (x < 60) return `<href href="URL">${text}</href>
+            <br>${x}${dict.units.s[userLang]}<br>${this.y} ${dict.units.w[userLang]}`
+        else
+        {
+          x = getHourMinSec(this.x)
+          return `<href href="URL">${text}</href><br>${x}
+            <br>${this.y}${dict.units.w[userLang]}`;
+        }
+      },
+      // formatter() {
+      //   const {
+      //     point
+      //   } = this;
+      //   return `<span>
+      //   <span>Rating = ${point.y}</span>
+      //   <button type="button" onclick="showMoreDetails()">More Details</button>
+      //  </span>`
+      // },
+      backgroundColor: {
+        linearGradient: [0, 0, 0, 60],
+        stops: [
+          [0, '#FFFFFF'],
+          [1, '#E0E0E0']
+        ]
+      },
+      borderWidth: 1,
+      borderColor: '#AAA'
+    },
+  })
+  chart.xAxis[0].setExtremes(1, 3600);
+}
+
+function openTraining(id){
+  console.log(id)
+};
+
+
+
+
+
+
+
+
+
+
 
 export let timePeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
   12, 14, 16, 18, 20, 22, 24, 26, 28, 30, //+2     30s
@@ -31,97 +230,16 @@ export let timePeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
   11700, 12600, 13500, 14400, 15300, 16200, 17100, 18000, //+900  300min
 ];
 
-async function startStatsScreen() {
-  console.time('db')
-  // let workoutsData = await db.getAll('workoutsData');
-  let workoutsData1 = await db.get('workoutsData', 346);
+// let timePeriod = [
+//   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
+//   13, 16, 19, 22, 25, 28, 31, 34, 37, 40, //+3     40s
+//   45, 50, 55, 60, 65, 70, 75, 80, 85, 90, //+5     1.5min
+//   100, 110, 120, 130, 140, 150, 160, 170, 180,  //+10     3min
+//   210, 240, 270, 300, 330, 360, 390, 420, 450, 480, 510, 540, 570, 600, //+30     10min
+//   660, 720, 810, 900, 990, 1080, 1170, 1260, 1350, 1440, 1530, 1620, 1710, 1800, //+90  30min
+//   1800, 2100, 2400, 2700, 3000, 3600, 3900, 4200, 4500, 4800, 5100, 5400, 5700, 6000, //+300  100min
+//   6600, 7200, 7800, 8400, 9000, 9600, 10200, 10800,  //+600  180min
+//   12900, 13800, 14700, 15600, 16500, 17400, 18300, //+900  300min
+// ];
 
-  // let timePeriod = [
-  //   1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
-  //   13, 16, 19, 22, 25, 28, 31, 34, 37, 40, //+3     40s
-  //   45, 50, 55, 60, 65, 70, 75, 80, 85, 90, //+5     1.5min
-  //   100, 110, 120, 130, 140, 150, 160, 170, 180,  //+10     3min
-  //   210, 240, 270, 300, 330, 360, 390, 420, 450, 480, 510, 540, 570, 600, //+30     10min
-  //   660, 720, 810, 900, 990, 1080, 1170, 1260, 1350, 1440, 1530, 1620, 1710, 1800, //+90  30min
-  //   1800, 2100, 2400, 2700, 3000, 3600, 3900, 4200, 4500, 4800, 5100, 5400, 5700, 6000, //+300  100min
-  //   6600, 7200, 7800, 8400, 9000, 9600, 10200, 10800,  //+600  180min
-  //   12900, 13800, 14700, 15600, 16500, 17400, 18300, //+900  300min
-  // ];
-
-  // let timePeriod = [1, 2, 5, 10, 20, 30, 60, 120, 300, 6000, 1200, 1800, 3600, 7200, 18000,]
-  console.log(timePeriod.length)
-  let result1 = searchMaxValue(timePeriod, workoutsData1, 'cycling',  'power');
-  console.log(result1)
-  console.timeEnd('db');
-}
-
-export function searchMaxValue(arr, obj, sport, unit) {
-  if (obj.sessionMesgs[0].sport === sport && obj.recordMesgs[0][unit]) {
-    let data = obj.recordMesgs;
-    let result = {}; // здесь будем хранить сумму наибольших значений за промежуток времени
-    let partialSum = {} // здесь будем хранить сумму значений на данном этапе итерации
-    for (let item of arr) {
-      if (Number.isInteger(item) && item > 0)
-        result[item] = 0;
-        partialSum[item] = 0;
-    }
-    for (let i = 0; i < data.length; i++) {
-      if (isNaN(data[i][unit])) continue;
-      for (let item of arr) {
-        if (item <= data.length) {
-          let previousValue = 0;
-          if (i < item) {
-            partialSum[item] = partialSum[item] + data[i][unit];
-            result[item] = Math.max(result[item], partialSum[item]);
-          } else if (i >= item && Number.isInteger(data[i - item][unit])) {
-            previousValue = data[i - item][unit];
-            partialSum[item] = partialSum[item] + data[i][unit] - previousValue;
-            result[item] = Math.max(result[item], partialSum[item]);
-          }
-        }
-      }
-    } for (let key in result) {
-      result[key] = Math.round(result[key] / key); // не забываем разделить временной отрезок
-    }
-    return result;
-  }
-  else return {};
-}
-
-
-// function searchMaxValue(arr, obj, sport, unit) {
-//   if (obj.sessionMesgs[0].sport === sport && obj.recordMesgs[0][unit]) {
-//     let data = obj.recordMesgs;
-//     console.log(data.length);
-//     // console.log(obj.sessionMesgs[0]['avgPower']);
-//     // формируем объект result с ключами из массива arr
-//     let result = {};
-//     for (let item of arr) {
-//       if (Number.isInteger(item) && item > 0)
-//       result[item] = 0;
-//     }
-//     for (let i = 0; i < data.length; i++) {
-//       // на каждой шаге итерации data получаем промежуточные значения
-//       for (let item of arr) {
-//         if (!isNaN(data[i]) || i + item > data.length) continue;
-//         let y = 1;
-//         if (item >= 300) y = 1;
-//         if (item >= 600) y = 2;
-//         if (item >= 1200) y = 4;
-//         if (item >= 1800) y = 6;
-//         if (item >= 3600) y = 8;
-//         if (item >= 7200) y = 10;
-//         if (item >= 9600) y = 12;
-//         let partialSum = 0;
-//         for (let j = 0; j < item; j += y) {
-//           partialSum += (data[i + j][unit])/y;
-//         }
-//         // если эти значения больше предыдущих, то обновляем result
-//         if (Math.floor(partialSum * y / item) > result[item]) {
-//           result[item] = Math.floor(partialSum * y / item)
-//         };
-//       }
-//     } return result;
-//   }
-//   else return {};
-// }
+// let timePeriod = [1, 2, 5, 10, 20, 30, 60, 120, 300, 6000, 1200, 1800, 3600, 7200, 18000,]

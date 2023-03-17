@@ -147,12 +147,16 @@ function del(e) {
   });
 }
 
-function openHighcharts(e, startOptions) {
-  let workoutId = parseInt(e.target.parentElement.parentElement.dataset.id);
+export function openHighcharts(e, startOptions) {
+  console.log(startOptions)
+  let workoutId = 0;
   let hcOptions = {
     ...startOptions,
-    urlParams: {workoutId}
   };
+  if (typeof e == 'object') {
+    workoutId = parseInt(e.target.parentElement.parentElement.dataset.id);
+  } else if (typeof e == 'number') workoutId = e;
+  hcOptions.urlParams = {workoutId}
   startOptions.app.switchToScreen('highChartsScreen', hcOptions);
 }
 
