@@ -188,6 +188,8 @@ export const dict = {
     trainings: {ru: 'Тренировки'},
     stats: {ru: 'Статистика', en: 'stats'},
     powerCurve: {ru: 'Кривая мощности', en: 'Power curve'},
+    hideMap: {ru: 'Скрыть карту', en: 'Hide map'},
+    showMap: {ru: 'Показать карту', en: 'Show map'},
   }
 };
 

@@ -12,12 +12,15 @@ import {
 } from "../config.js";
 import {convertPaceInMinute, convertSpeed, getHourMinSec, getMinSec} from "../functionsDate.js";
 import Highcharts from '../node_modules/highcharts/es-modules/masters/highcharts.src.js';
-import {timePeriod} from "../screens/stats.js";
+import {getPointForPowerCurve, timePeriod} from "../screens/stats.js";
+import {db} from "../db.js";
 
 let polylinePoints = [];
 let marker = {};
+let polylinePowerCurve = new L.Polyline([], {color: 'red', weight: 3});
 let distanceMax = 0;
 let active = false;
+let smoothing = 4;
 
 export let themeColor = getComputedStyle(document.documentElement)
   .getPropertyValue('--app-color');
@@ -38,7 +41,6 @@ export function addCharts(workoutData, workout, map) {
   marker = {};
   distanceMax = 0;
 
-  let smoothing = 4;
   let step = 0;
   let avgTimeSmoothing = 0;
   let stepTimeArray = [];
@@ -199,12 +201,12 @@ export function addCharts(workoutData, workout, map) {
   if (workout.powerCurve) {
     let powerCurveArray = [];
     let lastValue = 0;
-    for (let item of workout.powerCurve) {
-      powerCurveArray.push(item);
-      lastValue = item[0];
-    }
-    addChartByValue(configPowerCurve, 0, - 100, powerCurveArray,'');
-    addOptionsForPowerCurveChart(lastValue);
+    workout.powerCurve.forEach((value, key, map) => {
+      powerCurveArray.push([key, value.value],);
+      lastValue = key;
+    })
+    addChartByValue(configPowerCurve, 0, -100, powerCurveArray,'');
+    addOptionsForPowerCurveChart(lastValue, map, workout.powerCurve);
   };
 
   addChartByValue(configAltitude, altitudeMin, altitudeAvg, altitudeDistanceArray, stepTimeArray);
@@ -477,7 +479,6 @@ function zooming () {
 }
 
 function addStatsLive () {
-  // let statsLive = document.getElementById('statsLive');
   for (let chart of Highcharts.charts) {
     if (chart.series[0].name == 'powerCurve') continue;
     let name = chart.series[0].name;
@@ -534,14 +535,23 @@ function fillStatsLive (indexSeries0) {
   }
 }
 
-function addOptionsForPowerCurveChart (maxValueX) {
+async function addOptionsForPowerCurveChart (maxValueX, map, workoutPowerCurve) {
+  let workouts = await db.getAll('workouts');
+  let powerCurveMap = getPointForPowerCurve(workouts);
+  let powerCurveArray = [];
+  powerCurveMap.forEach((value, key, map) => {
+    if (workoutPowerCurve.get(key))
+    powerCurveArray.push([key, value.value]);
+  })
+  let maxPower = powerCurveArray[0][1];
   let options = {
     chart: {
-      height: 500,
+      height: 350,
     },
     xAxis:{
       tickWidth: 1,
-      tickPositions: timePeriod,
+      tickLength: 0,
+      // tickPixelInterval: 60,
       minorTickPosition: 'outside',
       showFirstLabel: true,
       labels: {
@@ -550,13 +560,14 @@ function addOptionsForPowerCurveChart (maxValueX) {
         else return getHourMinSec(this.value)
       },
       enabled: true,
-        y: 25,
+        y: 12,
     },
       min: 1,
       max: maxValueX,
     },
     yAxis:{
       showFirstLabel: false,
+      max: maxPower,
     },
     tooltip: {
       enabled: true,
@@ -568,7 +579,6 @@ function addOptionsForPowerCurveChart (maxValueX) {
           x = getHourMinSec(this.x)
           return `${x}<br>${this.y}${dict.units.w[userLang]}`;
         }
-
       },
       backgroundColor: {
         linearGradient: [0, 0, 0, 60],
@@ -585,11 +595,38 @@ function addOptionsForPowerCurveChart (maxValueX) {
         relativeXValue: true,
       }
     },
-
+    series: [{
+      zIndex: 50,
+      point: {
+        events: {
+          mouseOver: function() {
+            addPolylineToMap(this, map, workoutPowerCurve);
+          },
+          mouseOut: function() {
+            polylinePowerCurve.setLatLngs([]);
+          }
+        }
+      },
+    },],
   }
   for (let chart of Highcharts.charts) {
     if (chart.series[0].name == 'powerCurve') {
-      chart.update(options)
+      chart.addSeries({
+        data: powerCurveArray,
+      });
+      chart.update(options);
+      // chart.xAxis[0].setExtremes(1, 3600);
     }
   }
 }
+
+function addPolylineToMap (point, map, trainingPowerCurveMap) {
+  let firstIndex =  Math.round((trainingPowerCurveMap.get(point.x).index/smoothing));
+  let secondIndex = Math.round(firstIndex + (point.x/smoothing));
+  if (secondIndex - firstIndex < smoothing) secondIndex += 2;
+  let polylinePointsForPowerCurve = polylinePoints.slice(firstIndex, secondIndex);
+  polylinePowerCurve.addTo(map).setLatLngs(polylinePointsForPowerCurve);
+}
+
+
+

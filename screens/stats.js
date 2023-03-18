@@ -30,27 +30,27 @@ async function startStatsScreen(startOptions) {
   console.timeEnd('db');
 }
 
-function getPointForPowerCurve(allWorkouts){
+export function getPointForPowerCurve(allWorkouts){
   let powerCurveMap = new Map();
   allWorkouts.forEach(workout => {
     if ( workout.sport == 'cycling' && workout.powerCurve) {
-      for (let item of workout.powerCurve) {
-        if (isNaN(item[0]) || isNaN(item[1])) continue;
-        if (powerCurveMap.has(item[0])) {
-          if (item[1] > powerCurveMap.get(item[0]).value) {
-            powerCurveMap.set(item[0], {value: item[1], id: workout.id, timestamp: workout.timestamp,});
+      workout.powerCurve.forEach((value, key, map) => {
+        if (Number.isInteger(key) && Number.isInteger(value.value))
+          if (powerCurveMap.has(key)) {
+            if (value.value > powerCurveMap.get(key).value) {
+              powerCurveMap.set(key, {value: value.value, id: workout.id, timestamp: workout.timestamp,});
+            }
           }
+          else {
+          powerCurveMap.set(key, {value: value.value, id: workout.id, timestamp: workout.timestamp});
         }
-        else {
-          powerCurveMap.set(item[0], {value: item[1], id: workout.id, timestamp: workout.timestamp, });
-        }
-      }
+      })
     }
   })
   return powerCurveMap;
 }
 
-function addPowerCurveChart (powerCurveMap, config, startOptions) {
+export function addPowerCurveChart (powerCurveMap, config, startOptions) {
   let powerCurveArray = [];
   for (let item of powerCurveMap) {
     if (Number.isInteger(item[0]) && Number.isInteger(item[1].value))
@@ -101,7 +101,6 @@ function addPowerCurveChart (powerCurveMap, config, startOptions) {
       tickWidth: 1,
       // tickPositions: timePeriod,
       // tickPositions: [1, 2, 5, 10, 20, 30, 60, 120, 300, 6000, 1200, 1800, 3600, 7200, 18000,],
-      tickPixelInterval: 10,
       minorTickPosition: 'outside',
       showFirstLabel: true,
       labels: {
@@ -110,10 +109,10 @@ function addPowerCurveChart (powerCurveMap, config, startOptions) {
           else return getHourMinSec(this.value)
         },
         enabled: true,
-        y: 25,
+        y: 20,
       },
       min: 1,
-      max: (powerCurveArray[powerCurveArray.length - 1][0] + 100),
+      max: powerCurveArray[powerCurveArray.length - 1][0],
       crosshair: true,
     }],
     yAxis: [{
@@ -156,9 +155,6 @@ function addPowerCurveChart (powerCurveMap, config, startOptions) {
             click: function () {
               let id = powerCurveMap.get(this.x).id;
               openHighcharts(id, startOptions)
-              // openHighcharts(id);
-              // location.href = 'https://en.wikipedia.org/wiki/' +
-              //   this.options.key;
             }
           }
         }
@@ -168,16 +164,14 @@ function addPowerCurveChart (powerCurveMap, config, startOptions) {
       event: '',
       enabled: true,
       formatter: function () {
-        // let id = powerCurveMap.get(this.x).id;
-        let text = powerCurveMap.get(this.x).timestamp.toLocaleDateString();
+        let date = powerCurveMap.get(this.x).timestamp.toLocaleDateString();
         let x = this.x;
-        if (x < 60) return `<href href="URL">${text}</href>
-            <br>${x}${dict.units.s[userLang]}<br>${this.y} ${dict.units.w[userLang]}`
+        if (x < 60) return `${x}${dict.units.s[userLang]}
+            <br>${this.y} ${dict.units.w[userLang]}<br>${date}`
         else
         {
           x = getHourMinSec(this.x)
-          return `<href href="URL">${text}</href><br>${x}
-            <br>${this.y}${dict.units.w[userLang]}`;
+          return `${x}<br>${this.y}${dict.units.w[userLang]}<br>${date}`;
         }
       },
       // formatter() {
@@ -202,20 +196,6 @@ function addPowerCurveChart (powerCurveMap, config, startOptions) {
   })
   chart.xAxis[0].setExtremes(1, 3600);
 }
-
-function openTraining(id){
-  console.log(id)
-};
-
-
-
-
-
-
-
-
-
-
 
 export let timePeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
   12, 14, 16, 18, 20, 22, 24, 26, 28, 30, //+2     30s

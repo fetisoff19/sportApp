@@ -75,8 +75,6 @@ let timePeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s
 
 function searchMaxValue(arr, obj, sport, unit) {
     if (obj.sessionMesgs[0].sport === sport && obj.recordMesgs[0][unit]) {
-        let maxPowerFor1Second = 0;
-        if (obj.sessionMesgs[0].maxPower) maxPowerFor1Second = obj.sessionMesgs[0].maxPower;
         let data = obj.recordMesgs;
         let timestamp = 1;
         if (data[0].timestamp)
@@ -84,20 +82,18 @@ function searchMaxValue(arr, obj, sport, unit) {
         arr.forEach(item => item * timestamp);
         // let periodBetweenStep = 1;
         let result = new Map(); // здесь будем хранить сумму наибольших значений за промежуток времени
-        let partialSum = {1: 0,} // здесь будем хранить сумму значений на данном этапе итерации
-        result.set(1, maxPowerFor1Second);
+        let partialSum = {} // здесь будем хранить сумму значений на данном этапе итерации
+        let indexObj = {};
         for (let item of arr) {
-            if (item == 1) continue;
             if (Number.isInteger(item) && item > 0)
                 if (item > data.length) continue;
             result.set(item, 0);
             partialSum[item] = 0;
+            indexObj[item] = '';
         }
-
-        console.log(maxPowerFor1Second)
         for (let i = 0; i < data.length; i++) {
             if (isNaN(data[i][unit])) continue;
-            if (i > 0)
+            // if (i > 0)
             // periodBetweenStep = Math.round((data[i].timestamp - data[i - 1].timestamp) / 1000);// обнуляем счётчик partialSum
             for (let item of arr) {
                 if (item <= data.length) {
@@ -108,16 +104,23 @@ function searchMaxValue(arr, obj, sport, unit) {
                     let previousValue = 0;
                     if (i < item) {
                         partialSum[item] = partialSum[item] + data[i][unit];
-                        result.set(item, Math.max(result.get(item), partialSum[item]));
+                        if (partialSum[item] > result.get(item)) {
+                            result.set(item, partialSum[item]);
+                            indexObj[item] = 0;
+                        }
                     } else if (i >= item && Number.isInteger(data[i - item][unit])) {
                         previousValue = data[i - item][unit];
                         partialSum[item] = partialSum[item] + data[i][unit] - previousValue;
-                        result.set(item, Math.max(result.get(item), partialSum[item]));
+                        if (partialSum[item] > result.get(item)) {
+                            result.set(item, partialSum[item]);
+                            indexObj[item] = i - item;
+                        }
                     }
                 }
             }
-        } for (let key of result.keys()) {
-            result.set(key,  Math.round(result.get(key) / key));
+        }
+        for (let key of result.keys()) {
+            result.set(key, {value: Math.round(result.get(key) / key), index: +indexObj[key]});
         }
         return result;
     }
