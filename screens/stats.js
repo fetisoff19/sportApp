@@ -122,9 +122,9 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
       crosshair: true,
     }],
     yAxis: [{
-      min: 0,
+      min: 1,
       max: powerCurveArray[0][1],
-      showFirstLabel: false,
+      // showFirstLabel: false,
       title: {
         enabled: false,
       },
@@ -252,27 +252,27 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
 
   let btnPlus = document.createElement('button');
   btnPlus.classList.add('chartsButton', 'button')
-  btnPlus.innerHTML = 'zoomIn';
+  btnPlus.innerHTML = dict.title.zoomIn[userLang];
   btnPlus.onclick = zoomIn;
   let btnMinus = document.createElement('button');
   btnMinus.classList.add('chartsButton', 'button')
-  btnMinus.innerHTML = 'zoomOut';
+  btnMinus.innerHTML = dict.title.zoomOut[userLang];
   btnMinus.onclick = zoomOut;
   let btnLeft = document.createElement('button');
   btnLeft.classList.add('chartsButton', 'button')
-  btnLeft.innerHTML = 'left';
+  btnLeft.innerHTML = dict.title.left[userLang];
   btnLeft.onclick = function () {
     refreshPosition(true)
   };
   let btnRight = document.createElement('button');
   btnRight.classList.add('chartsButton', 'button')
-  btnRight.innerHTML = 'right';
+  btnRight.innerHTML = dict.title.right[userLang];
   btnRight.onclick = function () {
     refreshPosition()
   };
   let btnResetZoom = document.createElement('button');
   btnResetZoom.classList.add('chartsButton', 'button')
-  btnResetZoom.innerHTML = 'resetZoom';
+  btnResetZoom.innerHTML = dict.title.resetZoom[userLang];
   btnResetZoom.onclick = resetZoom;
 
   document.querySelector('.chartsButtons').append(btnPlus, btnMinus, btnResetZoom, btnLeft, btnRight)

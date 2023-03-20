@@ -267,23 +267,27 @@ export function addCharts(workoutData, workout, map) {
 
   let btnPlus = document.createElement('button');
   btnPlus.classList.add('chartsButton', 'button')
-  btnPlus.innerHTML = 'zoomIn';
+  btnPlus.innerHTML = dict.title.zoomIn[userLang];
   btnPlus.onclick = zoomIn;
   let btnMinus = document.createElement('button');
   btnMinus.classList.add('chartsButton', 'button')
-  btnMinus.innerHTML = 'zoomOut';
+  btnMinus.innerHTML = dict.title.zoomOut[userLang];
   btnMinus.onclick = zoomOut;
   let btnLeft = document.createElement('button');
   btnLeft.classList.add('chartsButton', 'button')
-  btnLeft.innerHTML = 'left';
-  btnLeft.onclick = function () {refreshPosition(true)};
+  btnLeft.innerHTML = dict.title.left[userLang];
+  btnLeft.onclick = function () {
+    refreshPosition(true)
+  };
   let btnRight = document.createElement('button');
   btnRight.classList.add('chartsButton', 'button')
-  btnRight.innerHTML = 'right';
-  btnRight.onclick = function () {refreshPosition()};
+  btnRight.innerHTML = dict.title.right[userLang];
+  btnRight.onclick = function () {
+    refreshPosition()
+  };
   let btnResetZoom = document.createElement('button');
   btnResetZoom.classList.add('chartsButton', 'button')
-  btnResetZoom.innerHTML = 'resetZoom';
+  btnResetZoom.innerHTML = dict.title.resetZoom[userLang];
   btnResetZoom.onclick = resetZoom;
 
   document.querySelector('.chartsButtons').append(btnPlus, btnMinus, btnResetZoom, btnLeft, btnRight)
@@ -654,6 +658,27 @@ async function addOptionsForPowerCurveChart (maxValueX, map, workoutPowerCurve) 
   let options = {
     chart: {
       height: 350,
+      resetZoomButton: {
+        position: {
+          x: 0,
+          y: -40,
+          // x: 5000,
+          // y: 1000,
+        },
+        theme: {
+          fill: themeLightBG,
+          stroke: 'silver',
+          states: {
+            hover: {
+              fill: themeColor,
+              style: {
+                display: 'block',
+                color: themeLightBG,
+              }
+            }
+          }
+        }
+      },
     },
     xAxis:{
       tickWidth: 1,
@@ -673,7 +698,8 @@ async function addOptionsForPowerCurveChart (maxValueX, map, workoutPowerCurve) 
       max: maxValueX,
     },
     yAxis:{
-      showFirstLabel: false,
+      // showFirstLabel: false,
+      min: 1,
       max: maxPower,
     },
     tooltip: {

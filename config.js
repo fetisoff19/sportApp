@@ -190,6 +190,11 @@ export const dict = {
     powerCurve: {ru: 'Кривая мощности', en: 'Power curve'},
     hideMap: {ru: 'Скрыть карту', en: 'Hide map'},
     showMap: {ru: 'Показать карту', en: 'Show map'},
+    zoomIn: {ru: 'Приблизить', en: 'Zoom in'},
+    zoomOut: {ru: 'Отдалить', en: 'Zoom out'},
+    left: {ru: 'Левее', en: 'Left'},
+    right: {ru: 'Правее', en: 'Right'},
+    resetZoom: {ru: 'Во всю ширину', en: 'Reset zoom'},
   }
 };
 
