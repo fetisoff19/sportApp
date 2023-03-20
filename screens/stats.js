@@ -7,7 +7,10 @@ import {getHourMinSec} from "../functionsDate.js";
 import {openHighcharts} from "./workouts.js";
 
 const page = `
-<div id="powerStats">
+<span id="leftRightButtons">
+    <span class="chartsButtons"></span>
+</span>
+<div id="powerStats">   
     <div id="allTimePowerCurve"></div> 
     <div id="powerTopStats"></div> 
 </div>
@@ -65,8 +68,10 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
       zoomType: 'x',
       resetZoomButton: {
         position: {
-          x: 0,
-          y: -40,
+          // x: 0,
+          // y: -40,
+          x: 5000,
+          y: 1000,
         },
         theme: {
           fill: themeLightBG,
@@ -75,6 +80,7 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
             hover: {
               fill: themeColor,
               style: {
+                display: 'none',
                 color: themeLightBG,
               }
             }
@@ -87,7 +93,7 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
     title: {
       text: '&#9900' + ' ' + config.title,
       align: 'left',
-      x: - 10,
+      x: -10,
       y: 30,
       style: {
         color: config.colorLine,
@@ -138,10 +144,9 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
       name: config.id,
       color: config.colorLine,
       lineWidth: 1,
-      marker: { radius: 1 },
+      marker: {radius: 1},
       point: {
-        events: {
-        }
+        events: {}
       },
     }],
     plotOptions: {
@@ -168,8 +173,7 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
         let x = this.x;
         if (x < 60) return `${x}${dict.units.s[userLang]}
             <br>${this.y} ${dict.units.w[userLang]}<br>${date}`
-        else
-        {
+        else {
           x = getHourMinSec(this.x)
           return `${x}<br>${this.y}${dict.units.w[userLang]}<br>${date}`;
         }
@@ -195,6 +199,108 @@ export function addPowerCurveChart (powerCurveMap, config, startOptions) {
     },
   })
   chart.xAxis[0].setExtremes(1, 3600);
+  let positionMinX = 0;
+  let positionMaxX = 0;
+  let dataMin = chart.xAxis[0].dataMin;
+  let dataMax = chart.xAxis[0].dataMax;
+  let offsetPlus = 0;
+  let offsetMinus = 0;
+
+  function refreshPosition(left) {
+    positionMinX = chart.xAxis[0].min;
+    positionMaxX = chart.xAxis[0].max;
+    offsetPlus = (positionMaxX - positionMinX) / 6;
+    offsetMinus = (positionMaxX - positionMinX) / 6;
+    if (positionMinX - offsetMinus <= dataMin) {
+      positionMinX = dataMin;
+      offsetMinus = 0;
+    }
+    if (positionMaxX + offsetPlus >= dataMax) {
+      positionMaxX = dataMax;
+      offsetPlus = 0;
+    }
+    if (left) chart.xAxis[0].setExtremes(positionMinX - offsetMinus, positionMaxX - offsetMinus);
+    else chart.xAxis[0].setExtremes(positionMinX + offsetPlus, positionMaxX + offsetPlus);
+  }
+
+  function zoomIn() {
+    positionMinX = chart.xAxis[0].min;
+    positionMaxX = chart.xAxis[0].max;
+    offsetPlus = (positionMaxX - positionMinX) / 6;
+    chart.xAxis[0].setExtremes(positionMinX + offsetPlus, positionMaxX - offsetPlus);
+  }
+
+  function zoomOut() {
+    positionMinX = chart.xAxis[0].min;
+    positionMaxX = chart.xAxis[0].max;
+    offsetPlus = (positionMaxX - positionMinX) / 6;
+    offsetMinus = (positionMaxX - positionMinX) / 6;
+    if (positionMinX - offsetMinus <= dataMin) {
+      positionMinX = dataMin;
+      offsetMinus = 0;
+    }
+    if (positionMaxX + offsetPlus >= dataMax) {
+      positionMaxX = dataMax;
+      offsetPlus = 0;
+    }
+    chart.xAxis[0].setExtremes(positionMinX - offsetMinus, positionMaxX + offsetPlus);
+  }
+
+  function resetZoom() {
+    chart.xAxis[0].setExtremes(dataMin, dataMax);
+  }
+
+  let btnPlus = document.createElement('button');
+  btnPlus.classList.add('chartsButton', 'button')
+  btnPlus.innerHTML = 'zoomIn';
+  btnPlus.onclick = zoomIn;
+  let btnMinus = document.createElement('button');
+  btnMinus.classList.add('chartsButton', 'button')
+  btnMinus.innerHTML = 'zoomOut';
+  btnMinus.onclick = zoomOut;
+  let btnLeft = document.createElement('button');
+  btnLeft.classList.add('chartsButton', 'button')
+  btnLeft.innerHTML = 'left';
+  btnLeft.onclick = function () {
+    refreshPosition(true)
+  };
+  let btnRight = document.createElement('button');
+  btnRight.classList.add('chartsButton', 'button')
+  btnRight.innerHTML = 'right';
+  btnRight.onclick = function () {
+    refreshPosition()
+  };
+  let btnResetZoom = document.createElement('button');
+  btnResetZoom.classList.add('chartsButton', 'button')
+  btnResetZoom.innerHTML = 'resetZoom';
+  btnResetZoom.onclick = resetZoom;
+
+  document.querySelector('.chartsButtons').append(btnPlus, btnMinus, btnResetZoom, btnLeft, btnRight)
+  document.addEventListener("keydown", (event) => {
+    switch (event.code) {
+      case 'ArrowLeft':
+        refreshPosition(true);
+        break;
+      case 'ArrowRight':
+        refreshPosition();
+        break;
+      case 'NumpadAdd':
+      case 'Equal':
+      case 'ArrowUp':
+        zoomIn();
+        break;
+      case 'NumpadSubtract':
+      case 'Minus':
+      case 'ArrowDown':
+        zoomOut();
+        break;
+      case 'Enter':
+      case 'NumpadEnter':
+      case 'Space':
+        resetZoom();
+        break;
+    }
+  });
 }
 
 export let timePeriod = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, //+1     10s

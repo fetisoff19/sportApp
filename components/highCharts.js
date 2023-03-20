@@ -215,6 +215,108 @@ export function addCharts(workoutData, workout, map) {
   addStatsLive();
   synchronizeMouseOut();
   addAxesLabel ();
+
+  let chart = Highcharts.charts[0];
+  let positionMinX = 0;
+  let positionMaxX = 0;
+  let dataMin = chart.xAxis[0].dataMin;
+  let dataMax = chart.xAxis[0].dataMax;
+  let offsetPlus = 0;
+  let offsetMinus = 0;
+
+  function refreshPosition(left) {
+    positionMinX = chart.xAxis[0].min;
+    positionMaxX = chart.xAxis[0].max;
+    offsetPlus = (positionMaxX - positionMinX)/6;
+    offsetMinus = (positionMaxX - positionMinX)/6;
+    if (positionMinX - offsetMinus <= dataMin) {
+      positionMinX = dataMin;
+      offsetMinus = 0;
+    }
+    if (positionMaxX + offsetPlus >= dataMax) {
+      positionMaxX = dataMax;
+      offsetPlus = 0;
+    }
+    if (left) chart.xAxis[0].setExtremes(positionMinX - offsetMinus, positionMaxX - offsetMinus);
+    else chart.xAxis[0].setExtremes(positionMinX + offsetPlus, positionMaxX + offsetPlus);
+  }
+  function zoomIn () {
+    positionMinX = chart.xAxis[0].min;
+    positionMaxX = chart.xAxis[0].max;
+    offsetPlus = (positionMaxX - positionMinX)/6;
+    chart.xAxis[0].setExtremes(positionMinX + offsetPlus, positionMaxX - offsetPlus);
+  }
+  function zoomOut () {
+    positionMinX = chart.xAxis[0].min;
+    positionMaxX = chart.xAxis[0].max;
+    offsetPlus = (positionMaxX - positionMinX)/6;
+    offsetMinus = (positionMaxX - positionMinX)/6;
+    if (positionMinX - offsetMinus <= dataMin) {
+      positionMinX = dataMin;
+      offsetMinus = 0;
+    }
+    if (positionMaxX + offsetPlus >= dataMax) {
+      positionMaxX = dataMax;
+      offsetPlus = 0;
+    }
+    chart.xAxis[0].setExtremes(positionMinX - offsetMinus, positionMaxX + offsetPlus);
+  }
+  function resetZoom() {
+    chart.xAxis[0].setExtremes(dataMin, dataMax);
+  }
+
+  let btnPlus = document.createElement('button');
+  btnPlus.classList.add('chartsButton', 'button')
+  btnPlus.innerHTML = 'zoomIn';
+  btnPlus.onclick = zoomIn;
+  let btnMinus = document.createElement('button');
+  btnMinus.classList.add('chartsButton', 'button')
+  btnMinus.innerHTML = 'zoomOut';
+  btnMinus.onclick = zoomOut;
+  let btnLeft = document.createElement('button');
+  btnLeft.classList.add('chartsButton', 'button')
+  btnLeft.innerHTML = 'left';
+  btnLeft.onclick = function () {refreshPosition(true)};
+  let btnRight = document.createElement('button');
+  btnRight.classList.add('chartsButton', 'button')
+  btnRight.innerHTML = 'right';
+  btnRight.onclick = function () {refreshPosition()};
+  let btnResetZoom = document.createElement('button');
+  btnResetZoom.classList.add('chartsButton', 'button')
+  btnResetZoom.innerHTML = 'resetZoom';
+  btnResetZoom.onclick = resetZoom;
+
+  document.querySelector('.chartsButtons').append(btnPlus, btnMinus, btnResetZoom, btnLeft, btnRight)
+  document.addEventListener("keydown", (event) => {
+    switch (event.code) {
+      case 'ArrowLeft':
+        refreshPosition(true);
+        event.preventDefault();
+        break;
+      case 'ArrowRight':
+        refreshPosition();
+        event.preventDefault();
+        break;
+      case 'NumpadAdd':
+      case 'Equal':
+      case 'ArrowUp':
+        zoomIn();
+        event.preventDefault();
+        break;
+      case 'NumpadSubtract':
+      case 'Minus':
+      case 'ArrowDown':
+        zoomOut();
+        event.preventDefault();
+        break;
+      case 'Enter':
+      case 'NumpadEnter':
+      case 'Space':
+        resetZoom();
+        event.preventDefault();
+        break;
+    }
+  });
 }
 
 function addChartByValue (config, valueMin, valueAvg, data, time) {
@@ -230,8 +332,10 @@ function addChartByValue (config, valueMin, valueAvg, data, time) {
         zoomType: 'x',
         resetZoomButton: {
           position: {
-            x: 0,
-            y: -40,
+            // x: 0,
+            // y: -40,
+            x: 5000,
+            y: 1000,
           },
           theme: {
             fill: themeLightBG,
@@ -240,6 +344,7 @@ function addChartByValue (config, valueMin, valueAvg, data, time) {
               hover: {
                 fill: themeColor,
                 style: {
+                  display: 'none',
                   color: themeLightBG,
                 }
               }
@@ -404,6 +509,8 @@ function addAxesLabel (){
         bottomChart.xAxis[0].update(bottomChartOptions);
         break;
     }
+  zooming();
+  synchronizeMouseOut();
 }
 
 function synchronizeMouseOut() {
@@ -627,6 +734,4 @@ function addPolylineToMap (point, map, trainingPowerCurveMap) {
   let polylinePointsForPowerCurve = polylinePoints.slice(firstIndex, secondIndex);
   polylinePowerCurve.addTo(map).setLatLngs(polylinePointsForPowerCurve);
 }
-
-
 

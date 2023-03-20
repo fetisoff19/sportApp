@@ -9,9 +9,11 @@ import {
 import {createMapWithWorkoutRoute} from "../components/maps.js";
 import {convertPace, convertSpeed, doubleValue, getHourMinSec, getMinSec} from "../functionsDate.js";
 import {BlockStatsComponent} from "../components/formComponent.js";
-import {ButtonComponent} from "../components/buttonComponent.js";
 
 const page = `
+<span id="leftRightButtons">
+    <span class="chartsButtons"></span>
+</span>
 <div id="viewTrainingPage">
   <div id="charts-container">
     <div id="statsLive">
@@ -67,15 +69,11 @@ async function startHighChartsScreen(options) {
   let mapElem = document.getElementById('map')
   db.get('workoutsData', +workout.id).then(workoutData => {
     let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, );
-    if (document.getElementById('buttonHideMap')) {
-      document.getElementById('buttonHideMap').remove();
-    }
     let buttonHideMap = document.createElement('button');
-    buttonHideMap.id = 'buttonHideMap'
     buttonHideMap.innerHTML = `${dict.title.hideMap[userLang]}`;
-    buttonHideMap.classList.add('app-nav-item');
+    buttonHideMap.classList.add('chartsButton', 'button');
     buttonHideMap.addEventListener('click', hideShowElem)
-    document.getElementById('app-nav').after(buttonHideMap);
+    document.querySelector('.chartsButtons').prepend(buttonHideMap);
     let status = true;
     function hideShowElem(){
       buttonHideMap.innerHTML = `${dict.title.showMap[userLang]}`;

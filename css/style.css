@@ -25,6 +25,7 @@ main {
   margin: 0 0 auto 10%;
   min-height: calc(100vh - var(--header-height) - var(--footer-height));
   /*overflow-x: hidden;*/
+  position: relative;
 }
 
 .app-header {
@@ -38,7 +39,7 @@ main {
   background-color: var(--app-color);
   color: var(--light-font);
   padding-left: 10%;
-  z-index: 9999;   /*из-за карты и графика*/
+  z-index: 1000;   /*из-за карты и графика*/
 }
 
 .app-logo {
@@ -78,7 +79,7 @@ main {
   height: var(--footer-height);
   background-color: var(--light-grey-bg);
   padding-left: 10%;
-  z-index: 9999;
+  z-index: 1000;
 }
 
 .button {
@@ -156,8 +157,7 @@ td {
   justify-content: flex-start;
   gap: 1rem;
   padding-top: 0.5rem;
-  margin-bottom: 0.5rem;
-  z-index: 9998;
+  z-index: 999;
   background-color: rgba(255, 255, 255, 0.8);
 }
 
@@ -247,10 +247,30 @@ td {
   top: var(--header-height);
 }
 
-
-#buttonHideMap {
-  margin-right: 500px;  /*сделать вычисляемым:*/
+#leftRightButtons{
+  z-index: 1001;
+  position: absolute;
+  height: 100%;
+  margin-left: calc(-10%);
 }
 
+.chartsButtons {
+  z-index: 1000;
+  position: sticky;
+  top: var(--header-height);
+  display: grid;
+  width: 8rem;
+}
+
+.chartsButton{
+  margin: 0.4rem;
+  border: 2px solid var(--light-font);
+  border-radius: var(--app-border-radius);
+}
+.chartsButton:hover {
+  color: var(--app-color);
+  background-color: var(--light-font);
+  border: 2px solid var(--app-color);
+}
 
 
