@@ -164,6 +164,7 @@ export const dict = {
     cadenceRun: {ru: 'шаг/мин', en: 'spm'},
     pace: {ru: '/км', en: '/km'},
     degreeCelsius: {ru: '°C', en: '°C'},
+    days: {ru: 'дней', en: 'day(s)'},
   },
   sports: {
     cycling: {ru: 'Велоспорт', en: 'Cycling'},
@@ -187,14 +188,17 @@ export const dict = {
     viewTraining: {ru: 'Просмотр тренировки'},
     trainings: {ru: 'Тренировки'},
     stats: {ru: 'Статистика', en: 'stats'},
+    analytics: {ru: 'Аналитика за период', en: 'Analytics for the period'},
     powerCurve: {ru: 'Кривая мощности', en: 'Power curve'},
     hideMap: {ru: 'Скрыть карту', en: 'Hide map'},
     showMap: {ru: 'Показать карту', en: 'Show map'},
+    anchorMap: {ru: 'Закрепить карту', en: 'Anchor the map'},
     zoomIn: {ru: 'Приблизить', en: 'Zoom in'},
     zoomOut: {ru: 'Отдалить', en: 'Zoom out'},
     left: {ru: 'Левее', en: 'Left'},
     right: {ru: 'Правее', en: 'Right'},
     resetZoom: {ru: 'Во всю ширину', en: 'Reset zoom'},
+    phraseValueBetter: {ru: 'больше среднего значения на ', en: 'better of the average value on'},
   }
 };
 

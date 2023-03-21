@@ -39,7 +39,7 @@ main {
   background-color: var(--app-color);
   color: var(--light-font);
   padding-left: 10%;
-  z-index: 1000;   /*из-за карты и графика*/
+  z-index: 1100;   /*из-за карты и графика*/
 }
 
 .app-logo {
@@ -186,7 +186,8 @@ td {
   justify-items: start;
   align-items: start;
   border-top: darkgrey solid 2px;
-  border-bottom: darkgrey solid 2px;
+  /*border-bottom: darkgrey solid 2px;*/
+  margin: 0;
   padding: 1rem 0;
 }
 
@@ -202,20 +203,22 @@ td {
 }
 
 /*статистика*/
-#paraStats {
+#paraStats, #paraAnalytics {
   font-size: 1.5rem;
   letter-spacing: 1px;
-  margin: 1rem 0;
+  padding: 1rem 0;
+  margin: 0;
+  border-top: darkgrey solid 2px;
 }
 
 #stats {
   display: grid;
   gap: 0.8rem;
   grid-template-columns: repeat(4, 100px);
-  /*font-size: 1.2rem;*/
+  padding-bottom: 1rem;
 }
 
-.statBlock > h4 {
+.statBlock > h4, #analytics > span {
   margin: 0 0 0.3rem 0;
   font-weight: 100;
   padding-bottom: 0.2rem;
@@ -232,6 +235,11 @@ td {
   font-size: 0.6rem;
 }
 
+#analytics span {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
 #powerCurve {
   width: 1200px;
 }
@@ -243,8 +251,9 @@ td {
 }
 
 #map {
-  position: sticky;
+  position: static;
   top: var(--header-height);
+  max-height: 100%;
 }
 
 #leftRightButtons{

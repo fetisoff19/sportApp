@@ -7,6 +7,8 @@ let filterArrForWorkouts = [
     'totalStrides',
     'totalCalories',
     'avgSpeed',
+    'avgPower',
+    'maxPower',
     'maxSpeed',
     'minAltitude',
     'avgAltitude',

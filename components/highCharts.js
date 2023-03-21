@@ -21,6 +21,7 @@ let polylinePowerCurve = new L.Polyline([], {color: 'red', weight: 3});
 let distanceMax = 0;
 let active = false;
 let smoothing = 4;
+let powerCurveChart;
 
 export let themeColor = getComputedStyle(document.documentElement)
   .getPropertyValue('--app-color');
@@ -40,6 +41,7 @@ export function addCharts(workoutData, workout, map) {
   polylinePoints = [];
   marker = {};
   distanceMax = 0;
+  powerCurveChart = undefined;
 
   let step = 0;
   let avgTimeSmoothing = 0;
@@ -217,6 +219,7 @@ export function addCharts(workoutData, workout, map) {
   addAxesLabel ();
 
   let chart = Highcharts.charts[0];
+
   let positionMinX = 0;
   let positionMaxX = 0;
   let dataMin = chart.xAxis[0].dataMin;
@@ -224,7 +227,51 @@ export function addCharts(workoutData, workout, map) {
   let offsetPlus = 0;
   let offsetMinus = 0;
 
-  function refreshPosition(left) {
+  for (let item of Highcharts.charts) {
+    if (item.series[0].name == 'powerCurve') {
+      powerCurveChart = item;
+    }
+  }
+
+  document.addEventListener('scroll', () => {
+    if (powerCurveChart) {
+      if (window.document.documentElement.scrollHeight - window.document.documentElement.scrollTop < window.document.documentElement.clientHeight + 10)
+      {
+        chart = powerCurveChart;
+        dataMin = chart.xAxis[0].dataMin;
+        dataMax = chart.xAxis[0].dataMax;
+        for (let item of Highcharts.charts) {
+          if (item.series[0].name !== 'powerCurve')
+            item.update({chart: {backgroundColor: {
+                  linearGradient: [0, 190, 0, 0],
+                  stops: [
+                    [0, 'rgb(255, 255, 255)'],
+                    [1, 'rgb(189,186,186)']
+                  ]
+                }}})
+          else item.update({chart: {backgroundColor: 'white'}})
+        };
+      }
+      else {
+        chart = Highcharts.charts[0];
+        dataMin = chart.xAxis[0].dataMin;
+        dataMax = chart.xAxis[0].dataMax;
+        for (let item of Highcharts.charts) {
+          if (item.series[0].name !== 'powerCurve')
+            item.update({chart: {backgroundColor: 'white'}})
+          else item.update({chart: {backgroundColor: {
+                linearGradient: [0, 0, 0, 100],
+                stops: [
+                  [0, 'rgb(255, 255, 255)'],
+                  [1, 'rgb(189,186,186)']
+                ]
+              }}})
+        }
+      }
+    }
+  })
+
+  function refreshPosition (left) {
     positionMinX = chart.xAxis[0].min;
     positionMaxX = chart.xAxis[0].max;
     offsetPlus = (positionMaxX - positionMinX)/6;
@@ -263,6 +310,7 @@ export function addCharts(workoutData, workout, map) {
   }
   function resetZoom() {
     chart.xAxis[0].setExtremes(dataMin, dataMax);
+    // if (position)
   }
 
   let btnPlus = document.createElement('button');
@@ -321,6 +369,7 @@ export function addCharts(workoutData, workout, map) {
         break;
     }
   });
+  zooming ();
 }
 
 function addChartByValue (config, valueMin, valueAvg, data, time) {
@@ -660,10 +709,10 @@ async function addOptionsForPowerCurveChart (maxValueX, map, workoutPowerCurve) 
       height: 350,
       resetZoomButton: {
         position: {
-          x: 0,
-          y: -40,
-          // x: 5000,
-          // y: 1000,
+          // x: 0,
+          // y: -40,
+          x: 5000,
+          y: 1000,
         },
         theme: {
           fill: themeLightBG,
@@ -672,7 +721,7 @@ async function addOptionsForPowerCurveChart (maxValueX, map, workoutPowerCurve) 
             hover: {
               fill: themeColor,
               style: {
-                display: 'block',
+                display: 'none',
                 color: themeLightBG,
               }
             }
@@ -760,4 +809,3 @@ function addPolylineToMap (point, map, trainingPowerCurveMap) {
   let polylinePointsForPowerCurve = polylinePoints.slice(firstIndex, secondIndex);
   polylinePowerCurve.addTo(map).setLatLngs(polylinePointsForPowerCurve);
 }
-

@@ -1,5 +1,5 @@
 import { Screen } from './Screen.js';
-import {addCharts} from "../components/highCharts.js";
+import {addCharts, themeColor, themeLightBG} from "../components/highCharts.js";
 import {db} from "../db.js";
 import {
   dict, fieldsAltitudeArray, fieldsCadenceCyclArray, fieldsCadenceRunArray,
@@ -42,6 +42,8 @@ const page = `
     <div id="mainInfo"></div>
     <p id="paraStats"></p>
     <div id="stats"></div>
+    <p id="paraAnalytics"></p>
+    <div id="analytics"></div>
   </div>
 </div>
 <div id="powerCurve" class="charts" ></div>
@@ -70,23 +72,28 @@ async function startHighChartsScreen(options) {
   db.get('workoutsData', +workout.id).then(workoutData => {
     let map = createMapWithWorkoutRoute(workoutData, mapElem, 300, );
     let buttonHideMap = document.createElement('button');
-    buttonHideMap.innerHTML = `${dict.title.hideMap[userLang]}`;
+    buttonHideMap.innerHTML = `${dict.title.anchorMap[userLang]}`;
     buttonHideMap.classList.add('chartsButton', 'button');
     buttonHideMap.addEventListener('click', hideShowElem)
     document.querySelector('.chartsButtons').prepend(buttonHideMap);
     let status = true;
     function hideShowElem(){
-      buttonHideMap.innerHTML = `${dict.title.showMap[userLang]}`;
+      buttonHideMap.innerHTML = `${dict.title.anchorMap[userLang]}`;
       status = !status;
-      mapElem.hidden = !status;
+      mapElem.style.position = 'sticky';
+      buttonHideMap.style.backgroundColor = themeLightBG;
+      buttonHideMap.style.color = themeColor;
       if (status) {
-        buttonHideMap.innerHTML = `${dict.title.hideMap[userLang]}`;
+        mapElem.style.position = 'static';
+        buttonHideMap.style.backgroundColor = themeColor;
+        buttonHideMap.style.color = 'white';
       }
     }
     addCharts(workoutData, workout, map);
     if (workoutData.sessionMesgs[0])
     addMainInfoAboutTraining(workoutData.sessionMesgs[0]);
     addStats (workoutData.sessionMesgs[0]);
+    addAnalytics (workoutData.sessionMesgs[0], analyticsItem, 365)
   });
 }
 
@@ -190,3 +197,48 @@ function addStats (obj) {
   blockOther.removeEmptyOrConflictElem();
   blockTime.removeEmptyOrConflictElem();
 };
+
+let analyticsItem = ['totalTimerTime', 'totalDistance',
+  'avgHeartRate', 'avgCadence', 'avgPower', 'avgSpeed', 'totalAscent', 'maxPower', 'maxHeartRate']
+async function addAnalytics (obj, arr, days) {
+  if (obj.sport === 'running') return
+  let analytics = document.getElementById('analytics');
+  let para = document.getElementById('paraAnalytics')
+  para.innerHTML = `${dict.title.analytics[userLang]} ${days} ${dict.units.days[userLang]}`;
+  let resultWorkout = {};
+  for (let item of arr) {
+    if (obj[item])
+    resultWorkout[item] = obj[item];
+  }
+  let statsAllTime = await addAllStats(obj.sport, arr, days);
+  for (let key in resultWorkout) {
+    resultWorkout[key] = resultWorkout[key]/statsAllTime[key]
+  }
+  for (let key in resultWorkout) {
+    if (resultWorkout[key] >= 1.05) {
+      let span = document.createElement('span')
+      span.innerHTML = `${dict.fields[key][userLang]} ${dict.title.phraseValueBetter[userLang]} 
+      ${Math.round((resultWorkout[key] - 1) * 100)}% <br/>`
+      analytics.append(span)
+    }
+  }
+};
+
+// статистика по sport по ключам из arr и за последние days
+async function addAllStats (sport, arr, days) {
+  let result = {};
+  let workouts = await db.getAll('workouts');
+  let periodOfTime = new Date() - days * 24 * 3600 * 1000;
+  workouts = workouts.sort((a, b) => b.timestamp - a.timestamp);
+  let index = workouts.findIndex(item => item.timestamp < periodOfTime);
+  for (let item of arr) {
+    let i = 1;
+    result[item] = 0;
+    for (let j = 0; j < index; j++) {
+      if (!workouts[j].sport === sport || !workouts[j][item]) continue;
+      result[item] = ((result[item] * (i - 1)) + workouts[j][item]) / i;
+      i++;
+    }
+  }
+  return result;
+}

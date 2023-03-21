@@ -25,12 +25,10 @@ export const statsScreen = new Screen({
 });
 
 async function startStatsScreen(startOptions) {
-  console.time('db')
   let workouts = await db.getAll('workouts');
   // console.log(workouts);
   let powerCurveMap = getPointForPowerCurve(workouts);
   addPowerCurveChart (powerCurveMap, configPowerCurveAllTime, startOptions)
-  console.timeEnd('db');
 }
 
 export function getPointForPowerCurve(allWorkouts){
